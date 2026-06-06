@@ -25,6 +25,7 @@ class TeslaMateDoorsOpenBinarySensor(TeslaMateMqttEntity, BinarySensorEntity):
     """Representation of whether any Tesla door is open."""
 
     _attr_device_class = BinarySensorDeviceClass.DOOR
+    _attr_icon = "mdi:car-door"
     _attr_name = "Doors"
 
     def __init__(self, data) -> None:

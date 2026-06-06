@@ -21,6 +21,7 @@ async def async_setup_entry(
 class TeslaMateVersionSensor(TeslaMateMqttEntity, SensorEntity):
     """Representation of the Tesla firmware version."""
 
+    _attr_icon = "mdi:numeric"
     _attr_name = "Version"
 
     def __init__(self, data) -> None:

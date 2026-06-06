@@ -9,6 +9,7 @@ from homeassistant.components import mqtt
 from homeassistant.components.teslamate_mqtt.const import CONF_TOPIC_ROOT, DOMAIN
 from homeassistant.const import (
     ATTR_GPS_ACCURACY,
+    ATTR_ICON,
     ATTR_LATITUDE,
     ATTR_LONGITUDE,
     STATE_OFF,
@@ -107,14 +108,23 @@ async def test_entities(
     await hass.async_block_till_done()
 
     assert hass.states.get("binary_sensor.roadrunner_doors").state == STATE_ON
+    assert (
+        hass.states.get("binary_sensor.roadrunner_doors").attributes[ATTR_ICON]
+        == "mdi:car-door"
+    )
 
     tracker_state = hass.states.get("device_tracker.roadrunner")
     assert tracker_state.state == "not_home"
     assert tracker_state.attributes[ATTR_LATITUDE] == 37.123
     assert tracker_state.attributes[ATTR_LONGITUDE] == -122.456
     assert tracker_state.attributes[ATTR_GPS_ACCURACY] == 0
+    assert tracker_state.attributes[ATTR_ICON] == "mdi:crosshairs-gps"
 
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
+    assert (
+        hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
+        == "mdi:numeric"
+    )
 
     device = device_registry.async_get_device(identifiers={(DOMAIN, "teslamate/cars/1")})
     assert device is not None
@@ -126,9 +136,9 @@ async def test_entities(
     assert entity_registry.async_get("binary_sensor.roadrunner_doors").unique_id == (
         "teslamate/cars/1/doors_open"
     )
-    assert entity_registry.async_get("device_tracker.roadrunner").unique_id == (
-        "teslamate/cars/1/location"
-    )
+    tracker_entry = entity_registry.async_get("device_tracker.roadrunner")
+    assert tracker_entry.unique_id == "teslamate/cars/1/location"
+    assert tracker_entry.entity_category is None
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"
     )

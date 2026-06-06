@@ -21,6 +21,8 @@ async def async_setup_entry(
 class TeslaMateDeviceTracker(TeslaMateMqttEntity, TrackerEntity):
     """Representation of the Tesla location."""
 
+    _attr_entity_category = None
+    _attr_icon = "mdi:crosshairs-gps"
     _attr_name = None
 
     def __init__(self, data) -> None:
