@@ -1,0 +1,34 @@
+tests/components/teslamate_mqtt/test_entity.py
+  s_95f31adbd24900::t_bfa09a30051019 4-5,8,51-67,71-73,78-82
+  s_95f31adbd24900::t_26feb4b9d03677 18,25-36,68-70,74-77,158-165
+  s_95f31adbd24900::t_9ed186de8f702a 166
+  s_95f31adbd24900::t_dbc709d61e5adf 167-184
+homeassistant/components/teslamate_mqtt/device_tracker.py
+  s_1032fdeb84d6ab::t_97e9208df6b1cb 8
+homeassistant/components/teslamate_mqtt/__init__.py
+  s_95f31adbd24900::t_87cc1b5f30ee56 28,57-58,64-66,68,72-74,79-80,175-176
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0629cb2bb1e17b09a8eceaabd5c56febf90a435b",
+  "prompts": {},
+  "sessions": {
+    "s_1032fdeb84d6ab": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9eba-6318-71f1-aec6-4a5a80e07c79",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Ben Hale <nebhale@nebhale.com>"
+    },
+    "s_95f31adbd24900": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9e19-5882-7843-a85f-566f8475163f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Ben Hale <nebhale@nebhale.com>"
+    }
+  }
+}
