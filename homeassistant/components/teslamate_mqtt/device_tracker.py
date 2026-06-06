@@ -5,7 +5,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import TeslaMateMqttConfigEntry
-from .const import TOPIC_BATTERY_LEVEL, TOPIC_LATITUDE, TOPIC_LONGITUDE
+from .const import TOPIC_LATITUDE, TOPIC_LONGITUDE
 from .entity import TeslaMateMqttEntity
 
 
@@ -26,16 +26,6 @@ class TeslaMateDeviceTracker(TeslaMateMqttEntity, TrackerEntity):
     def __init__(self, data) -> None:
         """Initialize the device tracker."""
         super().__init__(data, "location")
-
-    @property
-    def battery_level(self) -> int | None:
-        """Return the battery level."""
-        if (value := self.data.value(TOPIC_BATTERY_LEVEL)) is None:
-            return None
-        try:
-            return int(value)
-        except ValueError:
-            return None
 
     @property
     def latitude(self) -> float | None:

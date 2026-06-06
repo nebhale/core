@@ -3,7 +3,6 @@
 CONF_TOPIC_ROOT = "topic_root"
 DOMAIN = "teslamate_mqtt"
 
-TOPIC_BATTERY_LEVEL = "battery_level"
 TOPIC_DISPLAY_NAME = "display_name"
 TOPIC_DOORS_OPEN = "doors_open"
 TOPIC_LATITUDE = "latitude"
