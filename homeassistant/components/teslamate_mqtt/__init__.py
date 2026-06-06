@@ -131,6 +131,7 @@ class TeslaMateMqttData:
         """Return device info for the car."""
         device_info = DeviceInfo(
             identifiers={(DOMAIN, self.topic_root)},
+            manufacturer="Tesla",
             name=self.entry.title,
             sw_version=self.value(TOPIC_VERSION),
         )

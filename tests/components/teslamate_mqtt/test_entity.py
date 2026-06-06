@@ -80,6 +80,7 @@ async def test_entities(
 
     device = device_registry.async_get_device(identifiers={(DOMAIN, "teslamate/cars/1")})
     assert device is not None
+    assert device.manufacturer == "Tesla"
     assert device.name == "Roadrunner"
     assert device.model == "Model 3 Performance"
     assert device.sw_version == "2026.14.1"
