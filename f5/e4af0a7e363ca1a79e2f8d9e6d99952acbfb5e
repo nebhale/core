@@ -1,0 +1,49 @@
+homeassistant/components/teslamate_mqtt/quality_scale.yaml
+  s_95f31adbd24900::t_b3496ad05a6980 1-60
+homeassistant/components/teslamate_mqtt/binary_sensor.py
+  s_95f31adbd24900::t_b3496ad05a6980 1-39
+homeassistant/components/teslamate_mqtt/entity.py
+  s_95f31adbd24900::t_b3496ad05a6980 1-28
+tests/components/teslamate_mqtt/test_entity.py
+  s_95f31adbd24900::t_b3496ad05a6980 1-119
+homeassistant/components/teslamate_mqtt/sensor.py
+  s_95f31adbd24900::t_b3496ad05a6980 1-33
+homeassistant/components/teslamate_mqtt/strings.json
+  s_95f31adbd24900::t_b3496ad05a6980 1-19
+homeassistant/generated/config_flows.py
+  s_95f31adbd24900::t_b3496ad05a6980 756
+homeassistant/components/teslamate_mqtt/__init__.py
+  s_95f31adbd24900::t_b3496ad05a6980 1-184
+homeassistant/components/teslamate_mqtt/const.py
+  s_95f31adbd24900::t_b3496ad05a6980 1-13
+tests/components/teslamate_mqtt/__init__.py
+  s_95f31adbd24900::t_b3496ad05a6980 1
+homeassistant/components/teslamate_mqtt/config_flow.py
+  s_95f31adbd24900::t_b3496ad05a6980 1-144
+homeassistant/generated/integrations.json
+  s_95f31adbd24900::t_d320b615d081b9 226,441-442,636,1015,1234,1340,1829,1835,2091,2415,2438,2645-2646,2753,2952,3403,3421,3934,3946,3953,4420,4450,4479,4742,4815,5465,5593,5849-5850,5927,6256,6412,6886,7197-7202,7317,7684,7738,7785,7969,8087,8386,8429,8434,8440,8446,8452,8458,8464,8470,8475,8480,8485,8490,8495,8500,8512,8518,8530,8536,8541,8547,8559,8565,8570,8576,8582,8588
+homeassistant/components/teslamate_mqtt/device_tracker.py
+  s_95f31adbd24900::t_b3496ad05a6980 1-63
+homeassistant/components/teslamate_mqtt/manifest.json
+  s_95f31adbd24900::t_b3496ad05a6980 1-16
+homeassistant/generated/mqtt.py
+  s_95f31adbd24900::t_b3496ad05a6980 33-36
+tests/components/teslamate_mqtt/test_config_flow.py
+  s_95f31adbd24900::t_b3496ad05a6980 1-167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f5e4af0a7e363ca1a79e2f8d9e6d99952acbfb5e",
+  "prompts": {},
+  "sessions": {
+    "s_95f31adbd24900": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9e19-5882-7843-a85f-566f8475163f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Ben Hale <nebhale@nebhale.com>"
+    }
+  }
+}
