@@ -753,6 +753,7 @@ FLOWS = {
         "teltonika",
         "tesla_fleet",
         "tesla_wall_connector",
+        "teslamate_mqtt",
         "teslemetry",
         "tessie",
         "thermobeacon",

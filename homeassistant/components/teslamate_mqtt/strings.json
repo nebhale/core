@@ -1,0 +1,19 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    },
+    "error": {
+      "invalid_topic_root": "Invalid topic root",
+      "mqtt_not_connected": "Home Assistant MQTT integration is not connected to an MQTT broker",
+      "no_devices_found": "[%key:common::config_flow::abort::no_devices_found%]"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "topic_root": "Topic root"
+        }
+      }
+    }
+  }
+}

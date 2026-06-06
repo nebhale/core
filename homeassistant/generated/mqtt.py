@@ -30,4 +30,8 @@ MQTT = {
     "tasmota": [
         "tasmota/discovery/#",
     ],
+    "teslamate_mqtt": [
+        "teslamate/cars/+/display_name",
+        "teslamate/+/cars/+/display_name",
+    ],
 }

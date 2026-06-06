@@ -1,0 +1,16 @@
+{
+  "domain": "teslamate_mqtt",
+  "name": "TeslaMate MQTT",
+  "codeowners": ["@nebhale"],
+  "config_flow": true,
+  "dependencies": ["mqtt"],
+  "documentation": "https://www.home-assistant.io/integrations/teslamate_mqtt",
+  "homekit": {},
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "mqtt": ["teslamate/cars/+/display_name", "teslamate/+/cars/+/display_name"],
+  "quality_scale": "bronze",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": []
+}
