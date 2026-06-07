@@ -28,7 +28,9 @@ from homeassistant.const import (
     STATE_ON,
     STATE_UNKNOWN,
     UnitOfElectricCurrent,
+    UnitOfElectricPotential,
     UnitOfEnergy,
+    UnitOfPower,
 )
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr, entity_registry as er
@@ -127,6 +129,8 @@ async def test_entities(
     )
     assert hass.states.get("sensor.roadrunner_charger_current").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_charger_phases").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_charger_power").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_charger_voltage").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -141,6 +145,8 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_current_request_max", "48")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charger_actual_current", "40")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charger_phases", "3")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charger_power", "11")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charger_voltage", "240")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -275,6 +281,39 @@ async def test_entities(
         "sensor"
     ]["suggested_display_precision"] == 0
 
+    charger_power_state = hass.states.get("sensor.roadrunner_charger_power")
+    assert charger_power_state.state == "11"
+    assert charger_power_state.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.POWER
+    assert (
+        charger_power_state.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert (
+        charger_power_state.attributes[ATTR_UNIT_OF_MEASUREMENT]
+        == UnitOfPower.KILO_WATT
+    )
+    assert entity_registry.async_get("sensor.roadrunner_charger_power").options[
+        "sensor"
+    ]["suggested_display_precision"] == 0
+
+    charger_voltage_state = hass.states.get("sensor.roadrunner_charger_voltage")
+    assert charger_voltage_state.state == "240"
+    assert (
+        charger_voltage_state.attributes[ATTR_DEVICE_CLASS]
+        == SensorDeviceClass.VOLTAGE
+    )
+    assert (
+        charger_voltage_state.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert (
+        charger_voltage_state.attributes[ATTR_UNIT_OF_MEASUREMENT]
+        == UnitOfElectricPotential.VOLT
+    )
+    assert entity_registry.async_get("sensor.roadrunner_charger_voltage").options[
+        "sensor"
+    ]["suggested_display_precision"] == 0
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -322,6 +361,12 @@ async def test_entities(
     )
     assert entity_registry.async_get("sensor.roadrunner_charger_phases").unique_id == (
         "teslamate/cars/1/charger_phases"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_charger_power").unique_id == (
+        "teslamate/cars/1/charger_power"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_charger_voltage").unique_id == (
+        "teslamate/cars/1/charger_voltage"
     )
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"

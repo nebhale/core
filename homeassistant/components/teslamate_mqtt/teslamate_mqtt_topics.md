@@ -6,15 +6,15 @@
 | `active_route` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
 | `battery_level` | `Battery` | `battery` | `measurement` |  | `%` |  |  |
 | `center_display_state` | `Center Display` |  |  | `mdi:television` |  | For a Home Assistant Tesla `center_display_state` sensor, treat `vehicle_state.center_display_state` as an integer enum describing what the vehicle’s center display is currently showing or doing. Known values are: `0` means the center display is off. `2` means the display is on in standby, and may also represent Camp Mode. `3` means the display is on and showing the charging screen. `4` means the display is on in the general/default state. `5` means the display is on and showing the large charging screen. `6` means the display is on and ready to unlock. `7` means Sentry Mode. `8` means Dog Mode. `9` means Media. Value `1` is not documented in the sources I found, so preserve it as unknown rather than guessing. For future safety, any unrecognized integer should map to an unknown/unmapped state while retaining the raw value as an attribute. |  |
-| `charge_current_request_max` | `Charge Current Request (Max)` | `current` | `measurement` |  | `A` |  |  |
-| `charge_current_request` | `Charge Current Request` | `current` | `measurement` |  | `A` |  |  |
+| `charge_current_request_max` | `Charge Current Request (Max)` | `current` | `measurement` |  | `A` | Use zero digits of precision |  |
+| `charge_current_request` | `Charge Current Request` | `current` | `measurement` |  | `A` | Use zero digits of precision |  |
 | `charge_energy_added` | `Energy Added` | `energy` | `total_increasing` |  | `kWh` | Use one digit of precision | `Session total; expected to reset between charges.` |
-| `charge_limit_soc` | `Charge Limit` |  | `measurement` | `mdi:battery-charging-90` | `%` |  |  |
+| `charge_limit_soc` | `Charge Limit` |  | `measurement` | `mdi:battery-charging-90` | `%` | Use zero digits of precision |  |
 | `charge_port_door_open` | `Charge Port` | `door` |  | `mdi:ev-plug-tesla` |  |  |  |
-| `charger_actual_current` | `Charger Current` | `current` | `measurement` |  | `A` |  |  |
+| `charger_actual_current` | `Charger Current` | `current` | `measurement` |  | `A` | Use zero digits of precision |  |
 | `charger_phases` | `Charger Phases` |  | `measurement` | `mdi:sine-wave` | `phases` | Use zero digits of precision |  |
-| `charger_power` | `Charger Power` | `power` | `measurement` |  | `kW` |  |  |
-| `charger_voltage` | `Charger Voltage` | `voltage` | `measurement` |  | `V` |  |  |
+| `charger_power` | `Charger Power` | `power` | `measurement` |  | `kW` | Use zero digits of precision |  |
+| `charger_voltage` | `Charger Voltage` | `voltage` | `measurement` |  | `V` | Use zero digits of precision |  |
 | `charging_state` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
 | `climate_keeper_mode` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
 | `display_name` | `Display Name` |  |  | `mdi:form-textbox` |  |  |  |

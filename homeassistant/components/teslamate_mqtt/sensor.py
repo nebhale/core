@@ -7,7 +7,13 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, UnitOfElectricCurrent, UnitOfEnergy
+from homeassistant.const import (
+    PERCENTAGE,
+    UnitOfElectricCurrent,
+    UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfPower,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -21,6 +27,8 @@ from .const import (
     TOPIC_CHARGE_LIMIT_SOC,
     TOPIC_CHARGER_ACTUAL_CURRENT,
     TOPIC_CHARGER_PHASES,
+    TOPIC_CHARGER_POWER,
+    TOPIC_CHARGER_VOLTAGE,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -58,6 +66,8 @@ async def async_setup_entry(
             TeslaMateChargeCurrentRequestMaxSensor(entry.runtime_data),
             TeslaMateChargerActualCurrentSensor(entry.runtime_data),
             TeslaMateChargerPhasesSensor(entry.runtime_data),
+            TeslaMateChargerPowerSensor(entry.runtime_data),
+            TeslaMateChargerVoltageSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -105,6 +115,23 @@ class TeslaMateCurrentSensor(TeslaMateMqttEntity, SensorEntity):
             return None
 
 
+class TeslaMateIntegerMeasurementSensor(TeslaMateMqttEntity, SensorEntity):
+    """Base class for TeslaMate integer measurement sensors."""
+
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 0
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the integer measurement."""
+        if (value := self.data.value(self.key)) is None:
+            return None
+        try:
+            return int(value)
+        except ValueError:
+            return None
+
+
 class TeslaMateChargeCurrentRequestSensor(TeslaMateCurrentSensor):
     """Representation of the Tesla charge current request."""
 
@@ -135,28 +162,40 @@ class TeslaMateChargerActualCurrentSensor(TeslaMateCurrentSensor):
         super().__init__(data, TOPIC_CHARGER_ACTUAL_CURRENT)
 
 
-class TeslaMateChargerPhasesSensor(TeslaMateMqttEntity, SensorEntity):
+class TeslaMateChargerPhasesSensor(TeslaMateIntegerMeasurementSensor):
     """Representation of the Tesla charger phases."""
 
     _attr_icon = "mdi:sine-wave"
     _attr_name = "Charger Phases"
     _attr_native_unit_of_measurement = "phases"
-    _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_suggested_display_precision = 0
 
     def __init__(self, data) -> None:
         """Initialize the sensor."""
         super().__init__(data, TOPIC_CHARGER_PHASES)
 
-    @property
-    def native_value(self) -> int | None:
-        """Return the charger phases."""
-        if (value := self.data.value(TOPIC_CHARGER_PHASES)) is None:
-            return None
-        try:
-            return int(value)
-        except ValueError:
-            return None
+
+class TeslaMateChargerPowerSensor(TeslaMateIntegerMeasurementSensor):
+    """Representation of the Tesla charger power."""
+
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_name = "Charger Power"
+    _attr_native_unit_of_measurement = UnitOfPower.KILO_WATT
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_CHARGER_POWER)
+
+
+class TeslaMateChargerVoltageSensor(TeslaMateIntegerMeasurementSensor):
+    """Representation of the Tesla charger voltage."""
+
+    _attr_device_class = SensorDeviceClass.VOLTAGE
+    _attr_name = "Charger Voltage"
+    _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_CHARGER_VOLTAGE)
 
 
 class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):
