@@ -35,7 +35,7 @@
 | `is_user_present` | `Occupied` | `occupancy` |  | `mdi:account` |  |  |  |
 | `latitude` | `Latitude` |  | `measurement` | `mdi:latitude` | `°` |  | Used by the device tracker rather than exposed as a standalone sensor. |
 | `location` |  |  |  | `mdi:car` |  |  | Ignored as the device tracker builds this from the latitude and longitude directly. |
-| `locked` | `Locked` | `lock` |  |  |  |  | `Payloads are inverted for lock class.` |
+| `locked` | `Locked` | `lock` |  |  |  | Treat the TeslaMate locked value as a Home Assistant lock binary sensor. Because TeslaMate publishes `true` when the car is locked and `false` when the car is unlocked, invert the value so `true` reports off/locked and `false` reports on/unlocked. |  |
 | `longitude` | `Longitude` |  | `measurement` | `mdi:longitude` | `°` |  | Used by the device tracker rather than exposed as a standalone sensor. |
 | `model` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
 | `odometer` | `Odometer` |  | `total_increasing` | `mdi:counter` | `unitsCfg.Distance.DistanceLongUnits()` | `unitsCfg.Distance.DistanceLongValueTemplate()` |  |

@@ -138,6 +138,7 @@ async def test_entities(
         STATE_UNKNOWN
     )
     assert hass.states.get("binary_sensor.roadrunner_occupied").state == STATE_UNKNOWN
+    assert hass.states.get("binary_sensor.roadrunner_locked").state == STATE_UNKNOWN
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
@@ -186,6 +187,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/is_climate_on", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/is_preconditioning", "false")
     async_fire_mqtt_message(hass, "teslamate/cars/1/is_user_present", "true")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/locked", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/latitude", "37.123")
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
     async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
@@ -297,6 +299,10 @@ async def test_entities(
         == BinarySensorDeviceClass.OCCUPANCY
     )
     assert occupied_state.attributes[ATTR_ICON] == "mdi:account"
+
+    locked_state = hass.states.get("binary_sensor.roadrunner_locked")
+    assert locked_state.state == STATE_OFF
+    assert locked_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.LOCK
 
     tracker_state = hass.states.get("device_tracker.roadrunner")
     assert tracker_state.state == "not_home"
@@ -580,6 +586,9 @@ async def test_entities(
     assert entity_registry.async_get("binary_sensor.roadrunner_occupied").unique_id == (
         "teslamate/cars/1/is_user_present"
     )
+    assert entity_registry.async_get("binary_sensor.roadrunner_locked").unique_id == (
+        "teslamate/cars/1/locked"
+    )
     tracker_entry = entity_registry.async_get("device_tracker.roadrunner")
     assert tracker_entry.unique_id == "teslamate/cars/1/location"
     assert tracker_entry.entity_category is None
@@ -724,6 +733,25 @@ async def test_health_values(
     await hass.async_block_till_done()
 
     assert hass.states.get("binary_sensor.roadrunner_health").state == state
+
+
+@pytest.mark.parametrize(
+    ("payload", "state"),
+    [
+        pytest.param("true", STATE_OFF, id="locked"),
+        pytest.param("false", STATE_ON, id="unlocked"),
+    ],
+)
+async def test_locked_values(
+    hass: HomeAssistant, mqtt_mock: MqttMockHAClient, payload: str, state: str
+) -> None:
+    """Test locked value mapping."""
+    await _async_setup_entry(hass)
+
+    async_fire_mqtt_message(hass, "teslamate/cars/1/locked", payload)
+    await hass.async_block_till_done()
+
+    assert hass.states.get("binary_sensor.roadrunner_locked").state == state
 
 
 @pytest.mark.parametrize(

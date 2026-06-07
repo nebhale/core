@@ -18,6 +18,7 @@ from .const import (
     TOPIC_IS_CLIMATE_ON,
     TOPIC_IS_PRECONDITIONING,
     TOPIC_IS_USER_PRESENT,
+    TOPIC_LOCKED,
     TOPIC_PASSENGER_FRONT_DOOR_OPEN,
     TOPIC_PASSENGER_REAR_DOOR_OPEN,
 )
@@ -43,6 +44,7 @@ async def async_setup_entry(
             TeslaMateClimateOnBinarySensor(entry.runtime_data),
             TeslaMatePreconditioningBinarySensor(entry.runtime_data),
             TeslaMateUserPresentBinarySensor(entry.runtime_data),
+            TeslaMateLockedBinarySensor(entry.runtime_data),
         ]
     )
 
@@ -200,3 +202,21 @@ class TeslaMateUserPresentBinarySensor(TeslaMateBooleanBinarySensor):
     def __init__(self, data) -> None:
         """Initialize the binary sensor."""
         super().__init__(data, TOPIC_IS_USER_PRESENT)
+
+
+class TeslaMateLockedBinarySensor(TeslaMateMqttEntity, BinarySensorEntity):
+    """Representation of whether the Tesla is unlocked."""
+
+    _attr_device_class = BinarySensorDeviceClass.LOCK
+    _attr_name = "Locked"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_LOCKED)
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the Tesla is unlocked."""
+        if (value := self.data.value(TOPIC_LOCKED)) is None:
+            return None
+        return value.lower() == "false"
