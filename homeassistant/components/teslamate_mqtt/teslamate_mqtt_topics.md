@@ -64,7 +64,7 @@
 | `trim_badging` | `Trim Badging` |  |  | `mdi:form-textbox` |  |  | Used as the Home Assistant device name, so it is not exposed as a standalone sensor. |
 | `trunk_open` | `Trunk` | `door` |  | `mdi:car` |  |  |  |
 | `update_available` | `Update` | `update` |  |  |  |  |  |
-| `update_version` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
+| `update_version` | `Update Version` |  |  | `mdi:numeric` |  |  |  |
 | `usable_battery_level` | `Usable Battery` | `battery` | `measurement` |  | `%` |  |  |
 | `version` | `Version` |  |  | `mdi:numeric` |  |  |  |
 | `wheel_type` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
