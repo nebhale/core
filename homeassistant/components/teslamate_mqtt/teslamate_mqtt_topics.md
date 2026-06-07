@@ -15,9 +15,9 @@
 | `charger_phases` | `Charger Phases` |  | `measurement` | `mdi:sine-wave` | `phases` | Use zero digits of precision |  |
 | `charger_power` | `Charger Power` | `power` | `measurement` |  | `kW` | Use zero digits of precision |  |
 | `charger_voltage` | `Charger Voltage` | `voltage` | `measurement` |  | `V` | Use zero digits of precision |  |
-| `charging_state` | `Charging State` |  |  | `mdi:ev-station` |  | Preserve the TeslaMate charging state as a human-readable string, but split camel-case words into space-separated words. For example, `NoPower` should display as `No Power`. | `Missing in publish_discovery.go` |
-| `climate_keeper_mode` | `Climate Keeper` |  |  | `mdi:air-conditioner` |  | Preserve the TeslaMate climate keeper mode as a human-readable string, but title case the value. | `Missing in publish_discovery.go` |
-| `display_name` | `Display Name` |  |  | `mdi:form-textbox` |  |  |  |
+| `charging_state` | `Charging State` |  |  | `mdi:ev-station` |  | Preserve the TeslaMate charging state as a human-readable string, but split camel-case words into space-separated words. For example, `NoPower` should display as `No Power`. | |
+| `climate_keeper_mode` | `Climate Keeper` |  |  | `mdi:air-conditioner` |  | Preserve the TeslaMate climate keeper mode as a human-readable string, but title case the value. | |
+| `display_name` | `Display Name` |  |  | `mdi:form-textbox` |  |  | Used as the Home Assistant config entry title and device name, so it is not exposed as a standalone sensor. |
 | `doors_open` | `Doors` | `door` |  | `mdi:car-door` |  |  |  |
 | `driver_front_door_open` | `Door (Driver Front)` | `door` |  | `mdi:car-door` |  |  |  |
 | `driver_rear_door_open` | `Door (Driver Rear)` | `door` |  | `mdi:car-door` |  |  |  |
@@ -33,10 +33,10 @@
 | `is_climate_on` | `Climate` | `running` |  | `mdi:air-conditioner` |  |  |  |
 | `is_preconditioning` | `Preconditioning` | `running` |  | `mdi:air-conditioner` |  |  |  |
 | `is_user_present` | `Occupied` | `occupancy` |  | `mdi:account` |  |  |  |
-| `latitude` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
-| `location` |  |  |  | `mdi:car` |  | `home/not_home geofence template` | `Uses location as both state topic and JSON attributes topic.` |
+| `latitude` | `Latitude` |  | `measurement` | `mdi:latitude` | `°` |  | Used by the device tracker rather than exposed as a standalone sensor. |
+| `location` |  |  |  | `mdi:car` |  |  | Ignored as the device tracker builds this from the latitude and longitude directly. |
 | `locked` | `Locked` | `lock` |  |  |  |  | `Payloads are inverted for lock class.` |
-| `longitude` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
+| `longitude` | `Longitude` |  | `measurement` | `mdi:longitude` | `°` |  | Used by the device tracker rather than exposed as a standalone sensor. |
 | `model` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
 | `odometer` | `Odometer` |  | `total_increasing` | `mdi:counter` | `unitsCfg.Distance.DistanceLongUnits()` | `unitsCfg.Distance.DistanceLongValueTemplate()` |  |
 | `outside_temp` | `Temperature (Outside)` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |

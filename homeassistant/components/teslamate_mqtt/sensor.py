@@ -35,7 +35,6 @@ from .const import (
     TOPIC_CHARGER_VOLTAGE,
     TOPIC_CHARGING_STATE,
     TOPIC_CLIMATE_KEEPER_MODE,
-    TOPIC_DISPLAY_NAME,
     TOPIC_ELEVATION,
     TOPIC_EST_BATTERY_RANGE_KM,
     TOPIC_EXTERIOR_COLOR,
@@ -91,7 +90,6 @@ async def async_setup_entry(
             TeslaMateChargerVoltageSensor(entry.runtime_data),
             TeslaMateChargingStateSensor(entry.runtime_data),
             TeslaMateClimateKeeperModeSensor(entry.runtime_data),
-            TeslaMateDisplayNameSensor(entry.runtime_data),
             TeslaMateElevationSensor(entry.runtime_data),
             TeslaMateEstimatedBatteryRangeSensor(entry.runtime_data),
             TeslaMateExteriorColorSensor(entry.runtime_data),
@@ -295,22 +293,6 @@ class TeslaMateClimateKeeperModeSensor(TeslaMateMqttEntity, SensorEntity):
         if (value := self.data.value(TOPIC_CLIMATE_KEEPER_MODE)) is None:
             return None
         return value.title()
-
-
-class TeslaMateDisplayNameSensor(TeslaMateMqttEntity, SensorEntity):
-    """Representation of the Tesla display name."""
-
-    _attr_icon = "mdi:form-textbox"
-    _attr_name = "Display Name"
-
-    def __init__(self, data) -> None:
-        """Initialize the sensor."""
-        super().__init__(data, TOPIC_DISPLAY_NAME)
-
-    @property
-    def native_value(self) -> str | None:
-        """Return the display name."""
-        return self.data.value(TOPIC_DISPLAY_NAME)
 
 
 class TeslaMateExteriorColorSensor(TeslaMateMqttEntity, SensorEntity):

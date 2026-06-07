@@ -155,7 +155,7 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_charger_voltage").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_charging_state").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_climate_keeper").state == STATE_UNKNOWN
-    assert hass.states.get("sensor.roadrunner_display_name").state == "Roadrunner"
+    assert hass.states.get("sensor.roadrunner_display_name") is None
     assert hass.states.get("sensor.roadrunner_elevation").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_exterior_color").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_geofence").state == STATE_UNKNOWN
@@ -457,10 +457,6 @@ async def test_entities(
     assert climate_keeper.state == "Dog"
     assert climate_keeper.attributes[ATTR_ICON] == "mdi:air-conditioner"
 
-    display_name = hass.states.get("sensor.roadrunner_display_name")
-    assert display_name.state == "Roadrunner"
-    assert display_name.attributes[ATTR_ICON] == "mdi:form-textbox"
-
     elevation = hass.states.get("sensor.roadrunner_elevation")
     assert elevation.state == "123.0"
     assert elevation.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.DISTANCE
@@ -623,9 +619,7 @@ async def test_entities(
     assert entity_registry.async_get("sensor.roadrunner_climate_keeper").unique_id == (
         "teslamate/cars/1/climate_keeper_mode"
     )
-    assert entity_registry.async_get("sensor.roadrunner_display_name").unique_id == (
-        "teslamate/cars/1/display_name"
-    )
+    assert entity_registry.async_get("sensor.roadrunner_display_name") is None
     assert entity_registry.async_get("sensor.roadrunner_elevation").unique_id == (
         "teslamate/cars/1/elevation"
     )
@@ -663,8 +657,11 @@ async def test_entities(
     await hass.async_block_till_done()
 
     assert hass.states.get("binary_sensor.roadrunner_doors").state == STATE_OFF
-    assert hass.states.get("sensor.roadrunner_display_name").state == "Bluebird"
+    assert hass.states.get("sensor.roadrunner_display_name") is None
     assert entry.title == "Bluebird"
+    assert device_registry.async_get_device(
+        identifiers={(DOMAIN, "teslamate/cars/1")}
+    ).name == "Bluebird"
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_energy_added", "1.1")
     await hass.async_block_till_done()
