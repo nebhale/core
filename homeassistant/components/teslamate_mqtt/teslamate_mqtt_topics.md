@@ -32,18 +32,18 @@
 | `inside_temp` | `Temperature (Inside)` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
 | `is_climate_on` | `Climate` | `running` |  | `mdi:air-conditioner` |  |  |  |
 | `is_preconditioning` | `Preconditioning` | `running` |  | `mdi:air-conditioner` |  |  |  |
-| `is_user_present` | `Occupied` | `occupancy` |  | `mdi:account` |  |  |  |
+| `is_user_present` | `Occupancy` | `occupancy` |  | `mdi:account` |  |  |  |
 | `latitude` | `Latitude` |  | `measurement` | `mdi:latitude` | `°` |  | Used by the device tracker rather than exposed as a standalone sensor. |
 | `location` |  |  |  | `mdi:car` |  |  | Ignored as the device tracker builds this from the latitude and longitude directly. |
-| `locked` | `Locked` | `lock` |  |  |  | Treat the TeslaMate locked value as a Home Assistant lock binary sensor. Because TeslaMate publishes `true` when the car is locked and `false` when the car is unlocked, invert the value so `true` reports off/locked and `false` reports on/unlocked. |  |
+| `locked` | `Lock` | `lock` |  |  |  | Treat the TeslaMate locked value as a Home Assistant lock binary sensor. Because TeslaMate publishes `true` when the car is locked and `false` when the car is unlocked, invert the value so `true` reports off/locked and `false` reports on/unlocked. |  |
 | `longitude` | `Longitude` |  | `measurement` | `mdi:longitude` | `°` |  | Used by the device tracker rather than exposed as a standalone sensor. |
-| `model` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
-| `odometer` | `Odometer` |  | `total_increasing` | `mdi:counter` | `unitsCfg.Distance.DistanceLongUnits()` | `unitsCfg.Distance.DistanceLongValueTemplate()` |  |
+| `model` | `Model` |  |  | `mdi:form-textbox` |  |  | Used as the Home Assistant device name, so it is not exposed as a standalone sensor. |
+| `odometer` | `Odometer` | `distance` | `total_increasing` | `mdi:counter` | `km` | Use one digit of precision |  |
 | `outside_temp` | `Temperature (Outside)` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
 | `passenger_front_door_open` | `Door (Passenger Front)` | `door` |  | `mdi:car-door` |  |  |  |
 | `passenger_rear_door_open` | `Door (Passenger Rear)` | `door` |  | `mdi:car-door` |  |  |  |
 | `plugged_in` | `Plug` | `plug` |  |  |  |  |  |
-| `power` | `Power` | `power` | `measurement` |  | `kW` |  |  |
+| `power` | `Power` | `power` | `measurement` |  | `kW` | Use zero digits of precision |  |
 | `rated_battery_range_km` | `Range (Rated)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
 | `scheduled_charging_start_time` | `Scheduled Start Time` | `timestamp` |  |  |  |  |  |
 | `sentry_mode` | `Sentry Mode` |  |  | `mdi:cctv` |  |  |  |
@@ -61,7 +61,7 @@
 | `tpms_soft_warning_fr` | `Tire Soft (Front Right)` | `problem` |  | `mdi:car-tire-alert` |  |  |  |
 | `tpms_soft_warning_rl` | `Tire Soft (Rear Left)` | `problem` |  | `mdi:car-tire-alert` |  |  |  |
 | `tpms_soft_warning_rr` | `Tire Soft (Rear Right)` | `problem` |  | `mdi:car-tire-alert` |  |  |  |
-| `trim_badging` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
+| `trim_badging` | `Trim Badging` |  |  | `mdi:form-textbox` |  |  | Used as the Home Assistant device name, so it is not exposed as a standalone sensor. |
 | `trunk_open` | `Trunk` | `door` |  | `mdi:car` |  |  |  |
 | `update_available` | `Update` | `update` |  |  |  |  |  |
 | `update_version` |  |  |  |  |  |  | `Missing in publish_discovery.go` |

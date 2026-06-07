@@ -21,6 +21,7 @@ from .const import (
     TOPIC_LOCKED,
     TOPIC_PASSENGER_FRONT_DOOR_OPEN,
     TOPIC_PASSENGER_REAR_DOOR_OPEN,
+    TOPIC_PLUGGED_IN,
 )
 from .entity import TeslaMateMqttEntity
 
@@ -45,6 +46,7 @@ async def async_setup_entry(
             TeslaMatePreconditioningBinarySensor(entry.runtime_data),
             TeslaMateUserPresentBinarySensor(entry.runtime_data),
             TeslaMateLockedBinarySensor(entry.runtime_data),
+            TeslaMatePluggedInBinarySensor(entry.runtime_data),
         ]
     )
 
@@ -197,7 +199,7 @@ class TeslaMateUserPresentBinarySensor(TeslaMateBooleanBinarySensor):
 
     _attr_device_class = BinarySensorDeviceClass.OCCUPANCY
     _attr_icon = "mdi:account"
-    _attr_name = "Occupied"
+    _attr_name = "Occupancy"
 
     def __init__(self, data) -> None:
         """Initialize the binary sensor."""
@@ -208,7 +210,7 @@ class TeslaMateLockedBinarySensor(TeslaMateMqttEntity, BinarySensorEntity):
     """Representation of whether the Tesla is unlocked."""
 
     _attr_device_class = BinarySensorDeviceClass.LOCK
-    _attr_name = "Locked"
+    _attr_name = "Lock"
 
     def __init__(self, data) -> None:
         """Initialize the binary sensor."""
@@ -220,3 +222,14 @@ class TeslaMateLockedBinarySensor(TeslaMateMqttEntity, BinarySensorEntity):
         if (value := self.data.value(TOPIC_LOCKED)) is None:
             return None
         return value.lower() == "false"
+
+
+class TeslaMatePluggedInBinarySensor(TeslaMateBooleanBinarySensor):
+    """Representation of whether the Tesla is plugged in."""
+
+    _attr_device_class = BinarySensorDeviceClass.PLUG
+    _attr_name = "Plug"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_PLUGGED_IN)

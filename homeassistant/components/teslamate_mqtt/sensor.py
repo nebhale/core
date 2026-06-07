@@ -42,7 +42,9 @@ from .const import (
     TOPIC_HEADING,
     TOPIC_IDEAL_BATTERY_RANGE_KM,
     TOPIC_INSIDE_TEMP,
+    TOPIC_ODOMETER,
     TOPIC_OUTSIDE_TEMP,
+    TOPIC_POWER,
     TOPIC_RATED_BATTERY_RANGE_KM,
     TOPIC_VERSION,
 )
@@ -97,7 +99,9 @@ async def async_setup_entry(
             TeslaMateHeadingSensor(entry.runtime_data),
             TeslaMateIdealBatteryRangeSensor(entry.runtime_data),
             TeslaMateInsideTemperatureSensor(entry.runtime_data),
+            TeslaMateOdometerSensor(entry.runtime_data),
             TeslaMateOutsideTemperatureSensor(entry.runtime_data),
+            TeslaMatePowerSensor(entry.runtime_data),
             TeslaMateRatedBatteryRangeSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
@@ -182,6 +186,18 @@ class TeslaMateDistanceSensor(TeslaMateFloatSensor):
 
     _attr_device_class = SensorDeviceClass.DISTANCE
     _attr_state_class = SensorStateClass.MEASUREMENT
+
+
+class TeslaMatePowerSensor(TeslaMateIntegerMeasurementSensor):
+    """Representation of the Tesla power."""
+
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_name = "Power"
+    _attr_native_unit_of_measurement = UnitOfPower.KILO_WATT
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_POWER)
 
 
 class TeslaMateTemperatureSensor(TeslaMateFloatSensor):
@@ -381,6 +397,20 @@ class TeslaMateIdealBatteryRangeSensor(TeslaMateBatteryRangeSensor):
     def __init__(self, data) -> None:
         """Initialize the sensor."""
         super().__init__(data, TOPIC_IDEAL_BATTERY_RANGE_KM)
+
+
+class TeslaMateOdometerSensor(TeslaMateDistanceSensor):
+    """Representation of the Tesla odometer."""
+
+    _attr_icon = "mdi:counter"
+    _attr_name = "Odometer"
+    _attr_native_unit_of_measurement = UnitOfLength.KILOMETERS
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_suggested_display_precision = 1
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_ODOMETER)
 
 
 class TeslaMateInsideTemperatureSensor(TeslaMateTemperatureSensor):

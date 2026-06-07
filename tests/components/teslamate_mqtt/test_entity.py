@@ -137,8 +137,9 @@ async def test_entities(
     assert hass.states.get("binary_sensor.roadrunner_preconditioning").state == (
         STATE_UNKNOWN
     )
-    assert hass.states.get("binary_sensor.roadrunner_occupied").state == STATE_UNKNOWN
-    assert hass.states.get("binary_sensor.roadrunner_locked").state == STATE_UNKNOWN
+    assert hass.states.get("binary_sensor.roadrunner_occupancy").state == STATE_UNKNOWN
+    assert hass.states.get("binary_sensor.roadrunner_lock").state == STATE_UNKNOWN
+    assert hass.states.get("binary_sensor.roadrunner_plug").state == STATE_UNKNOWN
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
@@ -167,6 +168,8 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_temperature_outside").state == (
         STATE_UNKNOWN
     )
+    assert hass.states.get("sensor.roadrunner_odometer").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_power").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_range_estimated").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_range_ideal").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_range_rated").state == STATE_UNKNOWN
@@ -188,6 +191,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/is_preconditioning", "false")
     async_fire_mqtt_message(hass, "teslamate/cars/1/is_user_present", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/locked", "true")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/plugged_in", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/latitude", "37.123")
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
     async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
@@ -208,6 +212,8 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/heading", "270")
     async_fire_mqtt_message(hass, "teslamate/cars/1/inside_temp", "22.4")
     async_fire_mqtt_message(hass, "teslamate/cars/1/outside_temp", "18.7")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/odometer", "12345.6")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/power", "-7")
     async_fire_mqtt_message(hass, "teslamate/cars/1/est_battery_range_km", "321.5")
     async_fire_mqtt_message(hass, "teslamate/cars/1/ideal_battery_range_km", "330.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/rated_battery_range_km", "325.7")
@@ -292,7 +298,7 @@ async def test_entities(
     )
     assert preconditioning_state.attributes[ATTR_ICON] == "mdi:air-conditioner"
 
-    occupied_state = hass.states.get("binary_sensor.roadrunner_occupied")
+    occupied_state = hass.states.get("binary_sensor.roadrunner_occupancy")
     assert occupied_state.state == STATE_ON
     assert (
         occupied_state.attributes[ATTR_DEVICE_CLASS]
@@ -300,9 +306,13 @@ async def test_entities(
     )
     assert occupied_state.attributes[ATTR_ICON] == "mdi:account"
 
-    locked_state = hass.states.get("binary_sensor.roadrunner_locked")
+    locked_state = hass.states.get("binary_sensor.roadrunner_lock")
     assert locked_state.state == STATE_OFF
     assert locked_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.LOCK
+
+    plug_state = hass.states.get("binary_sensor.roadrunner_plug")
+    assert plug_state.state == STATE_ON
+    assert plug_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.PLUG
 
     tracker_state = hass.states.get("device_tracker.roadrunner")
     assert tracker_state.state == "not_home"
@@ -508,6 +518,25 @@ async def test_entities(
         "sensor"
     ]["suggested_display_precision"] == 1
 
+    odometer = hass.states.get("sensor.roadrunner_odometer")
+    assert odometer.state == "12345.6"
+    assert odometer.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.DISTANCE
+    assert odometer.attributes[ATTR_ICON] == "mdi:counter"
+    assert odometer.attributes[ATTR_STATE_CLASS] == SensorStateClass.TOTAL_INCREASING
+    assert odometer.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfLength.KILOMETERS
+    assert entity_registry.async_get("sensor.roadrunner_odometer").options["sensor"][
+        "suggested_display_precision"
+    ] == 1
+
+    power = hass.states.get("sensor.roadrunner_power")
+    assert power.state == "-7"
+    assert power.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.POWER
+    assert power.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
+    assert power.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfPower.KILO_WATT
+    assert entity_registry.async_get("sensor.roadrunner_power").options["sensor"][
+        "suggested_display_precision"
+    ] == 0
+
     estimated_range = hass.states.get("sensor.roadrunner_range_estimated")
     assert estimated_range.state == "321.5"
     assert estimated_range.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.DISTANCE
@@ -583,11 +612,14 @@ async def test_entities(
     assert entity_registry.async_get(
         "binary_sensor.roadrunner_preconditioning"
     ).unique_id == "teslamate/cars/1/is_preconditioning"
-    assert entity_registry.async_get("binary_sensor.roadrunner_occupied").unique_id == (
+    assert entity_registry.async_get("binary_sensor.roadrunner_occupancy").unique_id == (
         "teslamate/cars/1/is_user_present"
     )
-    assert entity_registry.async_get("binary_sensor.roadrunner_locked").unique_id == (
+    assert entity_registry.async_get("binary_sensor.roadrunner_lock").unique_id == (
         "teslamate/cars/1/locked"
+    )
+    assert entity_registry.async_get("binary_sensor.roadrunner_plug").unique_id == (
+        "teslamate/cars/1/plugged_in"
     )
     tracker_entry = entity_registry.async_get("device_tracker.roadrunner")
     assert tracker_entry.unique_id == "teslamate/cars/1/location"
@@ -647,6 +679,12 @@ async def test_entities(
     assert entity_registry.async_get(
         "sensor.roadrunner_temperature_outside"
     ).unique_id == "teslamate/cars/1/outside_temp"
+    assert entity_registry.async_get("sensor.roadrunner_odometer").unique_id == (
+        "teslamate/cars/1/odometer"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_power").unique_id == (
+        "teslamate/cars/1/power"
+    )
     assert entity_registry.async_get("sensor.roadrunner_range_estimated").unique_id == (
         "teslamate/cars/1/est_battery_range_km"
     )
@@ -751,7 +789,7 @@ async def test_locked_values(
     async_fire_mqtt_message(hass, "teslamate/cars/1/locked", payload)
     await hass.async_block_till_done()
 
-    assert hass.states.get("binary_sensor.roadrunner_locked").state == state
+    assert hass.states.get("binary_sensor.roadrunner_lock").state == state
 
 
 @pytest.mark.parametrize(
