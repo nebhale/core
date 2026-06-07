@@ -63,9 +63,9 @@
 | `tpms_soft_warning_rr` | `Tire Soft (Rear Right)` | `problem` |  | `mdi:car-tire-alert` |  |  |  |
 | `trim_badging` | `Trim Badging` |  |  | `mdi:form-textbox` |  |  | Used as the Home Assistant device name, so it is not exposed as a standalone sensor. |
 | `trunk_open` | `Trunk` | `door` |  | `mdi:car` |  |  |  |
-| `update_available` | `Update` | `update` |  |  |  |  |  |
-| `update_version` | `Update Version` |  |  | `mdi:numeric` |  |  |  |
+| `update_available` | `Update` | `firmware` |  |  |  |  | Exposed as an update entity. |
+| `update_version` | `Update` | `firmware` |  |  |  |  | Used as the latest version on the update entity. |
 | `usable_battery_level` | `Usable Battery` | `battery` | `measurement` |  | `%` |  |  |
-| `version` | `Version` |  |  | `mdi:numeric` |  |  |  |
+| `version` | `Version` |  |  | `mdi:numeric` |  |  | Used as the Home Assistant device software version, so it is not exposed as a standalone sensor. |
 | `wheel_type` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
 | `windows_open` | `Windows` | `window` |  | `mdi:car-door` |  |  |  |

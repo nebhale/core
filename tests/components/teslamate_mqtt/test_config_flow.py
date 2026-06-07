@@ -12,9 +12,7 @@ from tests.common import MockConfigEntry
 from tests.typing import MqttMockHAClient
 
 
-async def test_mqtt_discovery(
-    hass: HomeAssistant, mqtt_mock: MqttMockHAClient
-) -> None:
+async def test_mqtt_discovery(hass: HomeAssistant, mqtt_mock: MqttMockHAClient) -> None:
     """Test MQTT discovery creates a config entry."""
     discovery_info = MqttServiceInfo(
         topic="teslamate/cars/1/display_name",
@@ -107,9 +105,7 @@ async def test_mqtt_discovery_invalid_topic(
     assert result["reason"] == "invalid_discovery_info"
 
 
-async def test_user_flow(
-    hass: HomeAssistant, mqtt_mock: MqttMockHAClient
-) -> None:
+async def test_user_flow(hass: HomeAssistant, mqtt_mock: MqttMockHAClient) -> None:
     """Test manual configuration validates the display name topic."""
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}

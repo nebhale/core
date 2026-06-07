@@ -62,7 +62,6 @@ from .const import (
     TOPIC_TPMS_PRESSURE_FR,
     TOPIC_TPMS_PRESSURE_RL,
     TOPIC_TPMS_PRESSURE_RR,
-    TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
 
@@ -130,7 +129,6 @@ async def async_setup_entry(
             TeslaMateTirePressureFrontRightSensor(entry.runtime_data),
             TeslaMateTirePressureRearLeftSensor(entry.runtime_data),
             TeslaMateTirePressureRearRightSensor(entry.runtime_data),
-            TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
 
@@ -718,19 +716,3 @@ class TeslaMateCenterDisplayStateSensor(TeslaMateMqttEntity, SensorEntity):
         if (raw_value := self.data.value(TOPIC_CENTER_DISPLAY_STATE)) is None:
             return {}
         return {ATTR_RAW_VALUE: raw_value}
-
-
-class TeslaMateVersionSensor(TeslaMateMqttEntity, SensorEntity):
-    """Representation of the Tesla firmware version."""
-
-    _attr_icon = "mdi:numeric"
-    _attr_name = "Version"
-
-    def __init__(self, data) -> None:
-        """Initialize the sensor."""
-        super().__init__(data, TOPIC_VERSION)
-
-    @property
-    def native_value(self) -> str | None:
-        """Return the firmware version."""
-        return self.data.value(TOPIC_VERSION)
