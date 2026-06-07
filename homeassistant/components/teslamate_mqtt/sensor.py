@@ -19,6 +19,7 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfSpeed,
     UnitOfTemperature,
+    UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -55,6 +56,7 @@ from .const import (
     TOPIC_SPEED,
     TOPIC_SPOILER_TYPE,
     TOPIC_STATE,
+    TOPIC_TIME_TO_FULL_CHARGE,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -118,6 +120,7 @@ async def async_setup_entry(
             TeslaMateSpeedSensor(entry.runtime_data),
             TeslaMateSpoilerTypeSensor(entry.runtime_data),
             TeslaMateStateSensor(entry.runtime_data),
+            TeslaMateTimeToFullChargeSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -558,6 +561,20 @@ class TeslaMateStateSensor(TeslaMateMqttEntity, SensorEntity):
         if (value := self.data.value(TOPIC_STATE)) is None:
             return None
         return value.title()
+
+
+class TeslaMateTimeToFullChargeSensor(TeslaMateFloatSensor):
+    """Representation of the Tesla time to full charge."""
+
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_icon = "mdi:timer"
+    _attr_name = "Charging Time Left"
+    _attr_native_unit_of_measurement = UnitOfTime.HOURS
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_TIME_TO_FULL_CHARGE)
 
 
 class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):

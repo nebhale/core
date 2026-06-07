@@ -35,6 +35,7 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfSpeed,
     UnitOfTemperature,
+    UnitOfTime,
 )
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr, entity_registry as er
@@ -185,6 +186,9 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_speed").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_spoiler_type").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_state").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_charging_time_left").state == (
+        STATE_UNKNOWN
+    )
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -240,6 +244,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/speed", "88")
     async_fire_mqtt_message(hass, "teslamate/cars/1/spoiler_type", "CarbonFiber")
     async_fire_mqtt_message(hass, "teslamate/cars/1/state", "suspended")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/time_to_full_charge", "1.75")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -631,6 +636,13 @@ async def test_entities(
     assert vehicle_state.state == "Suspended"
     assert vehicle_state.attributes[ATTR_ICON] == "mdi:car-connected"
 
+    charging_time_left = hass.states.get("sensor.roadrunner_charging_time_left")
+    assert charging_time_left.state == "1.75"
+    assert charging_time_left.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.DURATION
+    assert charging_time_left.attributes[ATTR_ICON] == "mdi:timer"
+    assert charging_time_left.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
+    assert charging_time_left.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfTime.HOURS
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -779,6 +791,9 @@ async def test_entities(
     assert entity_registry.async_get("sensor.roadrunner_state").unique_id == (
         "teslamate/cars/1/state"
     )
+    assert entity_registry.async_get(
+        "sensor.roadrunner_charging_time_left"
+    ).unique_id == "teslamate/cars/1/time_to_full_charge"
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"
     )

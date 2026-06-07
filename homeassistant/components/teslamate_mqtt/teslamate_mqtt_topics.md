@@ -52,7 +52,7 @@
 | `speed` | `Speed` | `speed` | `measurement` | `mdi:speedometer` | `km/h` | Use zero digits of precision |  |
 | `spoiler_type` | `Spoiler Type` |  |  | `mdi:weather-windy` |  |  |  |
 | `state` | `State` |  |  | `mdi:car-connected` |  | Preserve the TeslaMate vehicle state as a human-readable string, but title case the value. |  |
-| `time_to_full_charge` | `Time to Charged` | `duration` | `measurement` | `mdi:timer` | `h` |  |  |
+| `time_to_full_charge` | `Charging Time Remaining` | `duration` | `measurement` | `mdi:timer` | `h` |  |  |
 | `tpms_pressure_fl` | `Tire Pressure (Front Left)` | `pressure` | `measurement` | `mdi:gauge` | `bar` | Use one digit of precision |  |
 | `tpms_pressure_fr` | `Tire Pressure (Front Right)` | `pressure` | `measurement` | `mdi:gauge` | `bar` | Use one digit of precision |  |
 | `tpms_pressure_rl` | `Tire Pressure (Rear Left)` | `pressure` | `measurement` | `mdi:gauge` | `bar` | Use one digit of precision |  |
