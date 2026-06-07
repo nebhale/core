@@ -3,6 +3,7 @@
 import asyncio
 from collections.abc import Callable
 import logging
+import re
 
 from homeassistant.components import mqtt
 from homeassistant.components.mqtt import ReceiveMessage
@@ -18,8 +19,10 @@ from .const import (
     DOMAIN,
     TOPIC_DISPLAY_NAME,
     TOPIC_MODEL,
+    TOPIC_SPOILER_TYPE,
     TOPIC_TRIM_BADGING,
     TOPIC_VERSION,
+    TOPIC_WHEEL_TYPE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -38,6 +41,26 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 type TeslaMateMqttConfigEntry = ConfigEntry[TeslaMateMqttData]
 type TeslaMateMqttListener = Callable[[], None]
+
+
+def _split_camel_case(value: str) -> str:
+    """Split camel-case words into space-separated words."""
+    return re.sub(r"(?<=[a-z])(?=[A-Z])", " ", value)
+
+
+def _format_wheel_type(value: str) -> str:
+    """Format a compact TeslaMate wheel type."""
+    if (match := re.fullmatch(r"(?P<name>[A-Za-z]+)(?P<size>\d+)", value)) is None:
+        return _split_camel_case(value)
+
+    return f'{_split_camel_case(match["name"])} {match["size"]}"'
+
+
+def _format_spoiler_type(value: str) -> str | None:
+    """Format a compact TeslaMate spoiler type."""
+    if value.lower() == "none":
+        return None
+    return _split_camel_case(value)
 
 
 class TeslaMateMqttData:
@@ -118,8 +141,10 @@ class TeslaMateMqttData:
         if key in {
             TOPIC_DISPLAY_NAME,
             TOPIC_MODEL,
+            TOPIC_SPOILER_TYPE,
             TOPIC_TRIM_BADGING,
             TOPIC_VERSION,
+            TOPIC_WHEEL_TYPE,
         }:
             self._async_update_device_info()
 
@@ -163,7 +188,19 @@ class TeslaMateMqttData:
         ]
         if not parts:
             return None
-        return f"Model {' '.join(parts)}"
+
+        model = f"Model {' '.join(parts)}"
+        details = []
+        if wheel_type := self.value(TOPIC_WHEEL_TYPE):
+            details.append(f"{_format_wheel_type(wheel_type)} Wheels")
+        if (spoiler_type := self.value(TOPIC_SPOILER_TYPE)) and (
+            formatted_spoiler_type := _format_spoiler_type(spoiler_type)
+        ):
+            details.append(f"{formatted_spoiler_type} Spoiler")
+
+        if details:
+            return f"{model} ({', '.join(details)})"
+        return model
 
 
 async def async_setup_entry(

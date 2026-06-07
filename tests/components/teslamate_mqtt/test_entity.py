@@ -209,7 +209,7 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_shift_state").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_last_seen").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_speed").state == STATE_UNKNOWN
-    assert hass.states.get("sensor.roadrunner_spoiler_type").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_spoiler_type") is None
     assert hass.states.get("sensor.roadrunner_state").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_charging_time_left").state == (
         STATE_UNKNOWN
@@ -231,7 +231,7 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_update_version") is None
     assert hass.states.get("sensor.roadrunner_usable_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version") is None
-    assert hass.states.get("sensor.roadrunner_wheel_type").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_wheel_type") is None
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/doors_open", "true")
@@ -805,17 +805,9 @@ async def test_entities(
         == 0
     )
 
-    spoiler_type = hass.states.get("sensor.roadrunner_spoiler_type")
-    assert spoiler_type.state == "CarbonFiber"
-    assert spoiler_type.attributes[ATTR_ICON] == "mdi:weather-windy"
-
     vehicle_state = hass.states.get("sensor.roadrunner_state")
     assert vehicle_state.state == "Suspended"
     assert vehicle_state.attributes[ATTR_ICON] == "mdi:car-connected"
-
-    wheel_type = hass.states.get("sensor.roadrunner_wheel_type")
-    assert wheel_type.state == 'Sonic Carbon Twin Turbine 19"'
-    assert wheel_type.attributes[ATTR_ICON] == "mdi:tire"
 
     charging_time_left = hass.states.get("sensor.roadrunner_charging_time_left")
     assert charging_time_left.state == "1.75"
@@ -934,7 +926,10 @@ async def test_entities(
     assert device is not None
     assert device.manufacturer == "Tesla"
     assert device.name == "Roadrunner"
-    assert device.model == "Model 3 Performance"
+    assert device.model == (
+        'Model 3 Performance (Sonic Carbon Twin Turbine 19" Wheels, '
+        "Carbon Fiber Spoiler)"
+    )
     assert device.sw_version == "2026.14.1"
 
     assert (
@@ -1149,15 +1144,11 @@ async def test_entities(
     assert entity_registry.async_get("sensor.roadrunner_speed").unique_id == (
         "teslamate/cars/1/speed"
     )
-    assert entity_registry.async_get("sensor.roadrunner_spoiler_type").unique_id == (
-        "teslamate/cars/1/spoiler_type"
-    )
+    assert entity_registry.async_get("sensor.roadrunner_spoiler_type") is None
     assert entity_registry.async_get("sensor.roadrunner_state").unique_id == (
         "teslamate/cars/1/state"
     )
-    assert entity_registry.async_get("sensor.roadrunner_wheel_type").unique_id == (
-        "teslamate/cars/1/wheel_type"
-    )
+    assert entity_registry.async_get("sensor.roadrunner_wheel_type") is None
     assert (
         entity_registry.async_get("sensor.roadrunner_charging_time_left").unique_id
         == "teslamate/cars/1/time_to_full_charge"
@@ -1267,26 +1258,45 @@ async def test_state_values(
 
 
 @pytest.mark.parametrize(
-    ("payload", "state"),
+    ("wheel_type", "spoiler_type", "model"),
     [
         pytest.param(
             "SonicCarbonTwinTurbine19",
-            'Sonic Carbon Twin Turbine 19"',
-            id="name_and_size",
+            "CarbonFiber",
+            'Model 3 Performance (Sonic Carbon Twin Turbine 19" Wheels, '
+            "Carbon Fiber Spoiler)",
+            id="wheel_and_spoiler",
         ),
-        pytest.param("Slipstream", "Slipstream", id="name_only"),
+        pytest.param(
+            "Slipstream",
+            "none",
+            "Model 3 Performance (Slipstream Wheels)",
+            id="wheel_without_spoiler",
+        ),
     ],
 )
-async def test_wheel_type_values(
-    hass: HomeAssistant, mqtt_mock: MqttMockHAClient, payload: str, state: str
+async def test_model_name_details(
+    hass: HomeAssistant,
+    mqtt_mock: MqttMockHAClient,
+    device_registry: dr.DeviceRegistry,
+    wheel_type: str,
+    spoiler_type: str,
+    model: str,
 ) -> None:
-    """Test wheel type value formatting."""
+    """Test device model detail formatting."""
     await _async_setup_entry(hass)
 
-    async_fire_mqtt_message(hass, "teslamate/cars/1/wheel_type", payload)
+    async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/wheel_type", wheel_type)
+    async_fire_mqtt_message(hass, "teslamate/cars/1/spoiler_type", spoiler_type)
     await hass.async_block_till_done()
 
-    assert hass.states.get("sensor.roadrunner_wheel_type").state == state
+    device = device_registry.async_get_device(
+        identifiers={(DOMAIN, "teslamate/cars/1")}
+    )
+    assert device is not None
+    assert device.model == model
 
 
 @pytest.mark.parametrize(

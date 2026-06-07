@@ -50,7 +50,7 @@
 | `shift_state` | `Shift State` |  |  | `mdi:car-shift-pattern` |  |  |  |
 | `since` | `Last Seen` | `timestamp` |  | `mdi:timer-sand` |  | Parse the value as a timestamp and use it as-is. |  |
 | `speed` | `Speed` | `speed` | `measurement` | `mdi:speedometer` | `km/h` | Use zero digits of precision |  |
-| `spoiler_type` | `Spoiler Type` |  |  | `mdi:weather-windy` |  |  |  |
+| `spoiler_type` | `Spoiler Type` |  |  | `mdi:weather-windy` |  | Split camel-case words into space-separated words. Append the formatted value to the Home Assistant device model as a parenthetical detail suffixed with `Spoiler`, unless the value is `none`. | Used as part of the Home Assistant device model, so it is not exposed as a standalone sensor. |
 | `state` | `State` |  |  | `mdi:car-connected` |  | Preserve the TeslaMate vehicle state as a human-readable string, but title case the value. |  |
 | `time_to_full_charge` | `Charging Time Remaining` | `duration` | `measurement` | `mdi:timer` | `h` |  |  |
 | `tpms_pressure_fl` | `Tire Pressure (Front Left)` | `pressure` | `measurement` | `mdi:gauge` | `bar` | Use one digit of precision |  |
@@ -67,5 +67,5 @@
 | `update_version` | `Update` | `firmware` |  |  |  |  | Used as the latest version on the update entity. |
 | `usable_battery_level` | `Usable Battery` | `battery` | `measurement` |  | `%` |  |  |
 | `version` | `Version` |  |  | `mdi:numeric` |  |  | Used as the Home Assistant device software version, so it is not exposed as a standalone sensor. |
-| `wheel_type` | `Wheel Type` |  |  | `mdi:tire` |  | Treat the TeslaMate wheel type as a compact string made from a camel-case wheel name followed by trailing digits for the wheel size. Split the camel-case name into space-separated words, insert a space before the size, and append a double quote to the size. For example, `SonicCarbonTwinTurbine19` should display as `Sonic Carbon Twin Turbine 19"`. |  |
+| `wheel_type` | `Wheel Type` |  |  | `mdi:tire` |  | Treat the TeslaMate wheel type as a compact string made from a camel-case wheel name followed by trailing digits for the wheel size. Split the camel-case name into space-separated words, insert a space before the size, append a double quote to the size, and append the formatted value to the Home Assistant device model as a parenthetical detail suffixed with `Wheels`. For example, `SonicCarbonTwinTurbine19` should contribute `Sonic Carbon Twin Turbine 19" Wheels`. | Used as part of the Home Assistant device model, so it is not exposed as a standalone sensor. |
 | `windows_open` | `Windows` | `window` |  | `mdi:car-door` |  |  |  |
