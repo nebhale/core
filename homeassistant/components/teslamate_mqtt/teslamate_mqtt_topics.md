@@ -23,10 +23,10 @@
 | `driver_rear_door_open` | `Door (Driver Rear)` | `door` |  | `mdi:car-door` |  |  |  |
 | `elevation` | `Elevation` | `distance` | `measurement` | `mdi:image-filter-hdr` | `m` | Use zero digits of precision |  |
 | `est_battery_range_km` | `Range (Estimated)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
-| `exterior_color` | `Exterior Color` |  |  | `mdi:format-color-fill` |  |  |  |
+| `exterior_color` | `Exterior Color` |  |  | `mdi:format-color-fill` |  | Preserve the TeslaMate exterior color as a human-readable string, but split camel-case words into space-separated words. For example, `DeepBlue` should display as `Deep Blue`. |  |
 | `frunk_open` | `Frunk` | `door` |  | `mdi:car` |  |  |  |
 | `geofence` | `Geofence` |  |  | `mdi:earth` |  |  |  |
-| `heading` | `Heading` |  |  | `mdi:compass` | `°` |  |  |
+| `heading` | `Heading` |  | `measurement` | `mdi:compass` | `°` | Use zero digits of precision |  |
 | `healthy` | `Health` | `problem` |  | `mdi:heart-pulse` |  |  | `Payloads are inverted: healthy=false maps to ON/problem.` |
 | `ideal_battery_range_km` | `Range (Ideal)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
 | `inside_temp` | `Inside Temp` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |

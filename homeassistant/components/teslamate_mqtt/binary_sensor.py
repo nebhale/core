@@ -13,6 +13,7 @@ from .const import (
     TOPIC_DOORS_OPEN,
     TOPIC_DRIVER_FRONT_DOOR_OPEN,
     TOPIC_DRIVER_REAR_DOOR_OPEN,
+    TOPIC_FRUNK_OPEN,
     TOPIC_PASSENGER_FRONT_DOOR_OPEN,
     TOPIC_PASSENGER_REAR_DOOR_OPEN,
 )
@@ -33,6 +34,7 @@ async def async_setup_entry(
             TeslaMateDriverRearDoorOpenBinarySensor(entry.runtime_data),
             TeslaMatePassengerFrontDoorOpenBinarySensor(entry.runtime_data),
             TeslaMatePassengerRearDoorOpenBinarySensor(entry.runtime_data),
+            TeslaMateFrunkOpenBinarySensor(entry.runtime_data),
         ]
     )
 
@@ -120,3 +122,14 @@ class TeslaMatePassengerRearDoorOpenBinarySensor(TeslaMateDoorOpenBinarySensor):
     def __init__(self, data) -> None:
         """Initialize the binary sensor."""
         super().__init__(data, TOPIC_PASSENGER_REAR_DOOR_OPEN)
+
+
+class TeslaMateFrunkOpenBinarySensor(TeslaMateDoorOpenBinarySensor):
+    """Representation of whether the Tesla frunk is open."""
+
+    _attr_icon = "mdi:car"
+    _attr_name = "Frunk"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_FRUNK_OPEN)

@@ -9,6 +9,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import (
+    DEGREE,
     PERCENTAGE,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
@@ -36,6 +37,9 @@ from .const import (
     TOPIC_DISPLAY_NAME,
     TOPIC_ELEVATION,
     TOPIC_EST_BATTERY_RANGE_KM,
+    TOPIC_EXTERIOR_COLOR,
+    TOPIC_GEOFENCE,
+    TOPIC_HEADING,
     TOPIC_IDEAL_BATTERY_RANGE_KM,
     TOPIC_RATED_BATTERY_RANGE_KM,
     TOPIC_VERSION,
@@ -57,6 +61,11 @@ CENTER_DISPLAY_STATES = {
 }
 
 ATTR_RAW_VALUE = "raw_value"
+
+
+def _split_camel_case(value: str) -> str:
+    """Split camel-case words into space-separated words."""
+    return re.sub(r"(?<=[a-z])(?=[A-Z])", " ", value)
 
 
 async def async_setup_entry(
@@ -82,6 +91,9 @@ async def async_setup_entry(
             TeslaMateDisplayNameSensor(entry.runtime_data),
             TeslaMateElevationSensor(entry.runtime_data),
             TeslaMateEstimatedBatteryRangeSensor(entry.runtime_data),
+            TeslaMateExteriorColorSensor(entry.runtime_data),
+            TeslaMateGeofenceSensor(entry.runtime_data),
+            TeslaMateHeadingSensor(entry.runtime_data),
             TeslaMateIdealBatteryRangeSensor(entry.runtime_data),
             TeslaMateRatedBatteryRangeSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
@@ -148,21 +160,25 @@ class TeslaMateIntegerMeasurementSensor(TeslaMateMqttEntity, SensorEntity):
             return None
 
 
-class TeslaMateDistanceSensor(TeslaMateMqttEntity, SensorEntity):
-    """Base class for TeslaMate distance sensors."""
-
-    _attr_device_class = SensorDeviceClass.DISTANCE
-    _attr_state_class = SensorStateClass.MEASUREMENT
+class TeslaMateFloatSensor(TeslaMateMqttEntity, SensorEntity):
+    """Base class for TeslaMate float sensors."""
 
     @property
     def native_value(self) -> float | None:
-        """Return the distance."""
+        """Return the float value."""
         if (value := self.data.value(self.key)) is None:
             return None
         try:
             return float(value)
         except ValueError:
             return None
+
+
+class TeslaMateDistanceSensor(TeslaMateFloatSensor):
+    """Base class for TeslaMate distance sensors."""
+
+    _attr_device_class = SensorDeviceClass.DISTANCE
+    _attr_state_class = SensorStateClass.MEASUREMENT
 
 
 class TeslaMateChargeCurrentRequestSensor(TeslaMateCurrentSensor):
@@ -246,7 +262,7 @@ class TeslaMateChargingStateSensor(TeslaMateMqttEntity, SensorEntity):
         """Return the charging state."""
         if (value := self.data.value(TOPIC_CHARGING_STATE)) is None:
             return None
-        return re.sub(r"(?<=[a-z])(?=[A-Z])", " ", value)
+        return _split_camel_case(value)
 
 
 class TeslaMateClimateKeeperModeSensor(TeslaMateMqttEntity, SensorEntity):
@@ -281,6 +297,53 @@ class TeslaMateDisplayNameSensor(TeslaMateMqttEntity, SensorEntity):
     def native_value(self) -> str | None:
         """Return the display name."""
         return self.data.value(TOPIC_DISPLAY_NAME)
+
+
+class TeslaMateExteriorColorSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla exterior color."""
+
+    _attr_icon = "mdi:format-color-fill"
+    _attr_name = "Exterior Color"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_EXTERIOR_COLOR)
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the exterior color."""
+        if (value := self.data.value(TOPIC_EXTERIOR_COLOR)) is None:
+            return None
+        return _split_camel_case(value)
+
+
+class TeslaMateGeofenceSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla geofence."""
+
+    _attr_icon = "mdi:earth"
+    _attr_name = "Geofence"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_GEOFENCE)
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the geofence."""
+        return self.data.value(TOPIC_GEOFENCE)
+
+
+class TeslaMateHeadingSensor(TeslaMateIntegerMeasurementSensor):
+    """Representation of the Tesla heading."""
+
+    _attr_icon = "mdi:compass"
+    _attr_name = "Heading"
+    _attr_native_unit_of_measurement = DEGREE
+    _attr_suggested_display_precision = 0
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_HEADING)
 
 
 class TeslaMateElevationSensor(TeslaMateDistanceSensor):

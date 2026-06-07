@@ -23,6 +23,7 @@ from homeassistant.const import (
     ATTR_LATITUDE,
     ATTR_LONGITUDE,
     ATTR_UNIT_OF_MEASUREMENT,
+    DEGREE,
     PERCENTAGE,
     STATE_OFF,
     STATE_ON,
@@ -129,6 +130,7 @@ async def test_entities(
     assert hass.states.get("binary_sensor.roadrunner_door_passenger_rear").state == (
         STATE_UNKNOWN
     )
+    assert hass.states.get("binary_sensor.roadrunner_frunk").state == STATE_UNKNOWN
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
@@ -148,6 +150,9 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_climate_keeper").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_display_name").state == "Roadrunner"
     assert hass.states.get("sensor.roadrunner_elevation").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_exterior_color").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_geofence").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_heading").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_range_estimated").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_range_ideal").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_range_rated").state == STATE_UNKNOWN
@@ -163,6 +168,7 @@ async def test_entities(
     async_fire_mqtt_message(
         hass, "teslamate/cars/1/passenger_rear_door_open", "false"
     )
+    async_fire_mqtt_message(hass, "teslamate/cars/1/frunk_open", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/latitude", "37.123")
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
     async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
@@ -178,6 +184,9 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/charging_state", "NoPower")
     async_fire_mqtt_message(hass, "teslamate/cars/1/climate_keeper_mode", "dog")
     async_fire_mqtt_message(hass, "teslamate/cars/1/elevation", "123")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/exterior_color", "DeepBlue")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/geofence", "Home")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/heading", "270")
     async_fire_mqtt_message(hass, "teslamate/cars/1/est_battery_range_km", "321.5")
     async_fire_mqtt_message(hass, "teslamate/cars/1/ideal_battery_range_km", "330.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/rated_battery_range_km", "325.7")
@@ -236,6 +245,11 @@ async def test_entities(
         == BinarySensorDeviceClass.DOOR
     )
     assert passenger_rear_door_state.attributes[ATTR_ICON] == "mdi:car-door"
+
+    frunk_state = hass.states.get("binary_sensor.roadrunner_frunk")
+    assert frunk_state.state == STATE_ON
+    assert frunk_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.DOOR
+    assert frunk_state.attributes[ATTR_ICON] == "mdi:car"
 
     tracker_state = hass.states.get("device_tracker.roadrunner")
     assert tracker_state.state == "not_home"
@@ -410,6 +424,23 @@ async def test_entities(
         "sensor"
     ]["suggested_display_precision"] == 0
 
+    exterior_color = hass.states.get("sensor.roadrunner_exterior_color")
+    assert exterior_color.state == "Deep Blue"
+    assert exterior_color.attributes[ATTR_ICON] == "mdi:format-color-fill"
+
+    geofence = hass.states.get("sensor.roadrunner_geofence")
+    assert geofence.state == "Home"
+    assert geofence.attributes[ATTR_ICON] == "mdi:earth"
+
+    heading = hass.states.get("sensor.roadrunner_heading")
+    assert heading.state == "270"
+    assert heading.attributes[ATTR_ICON] == "mdi:compass"
+    assert heading.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
+    assert heading.attributes[ATTR_UNIT_OF_MEASUREMENT] == DEGREE
+    assert entity_registry.async_get("sensor.roadrunner_heading").options["sensor"][
+        "suggested_display_precision"
+    ] == 0
+
     estimated_range = hass.states.get("sensor.roadrunner_range_estimated")
     assert estimated_range.state == "321.5"
     assert estimated_range.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.DISTANCE
@@ -473,6 +504,9 @@ async def test_entities(
     assert entity_registry.async_get(
         "binary_sensor.roadrunner_door_passenger_rear"
     ).unique_id == "teslamate/cars/1/passenger_rear_door_open"
+    assert entity_registry.async_get("binary_sensor.roadrunner_frunk").unique_id == (
+        "teslamate/cars/1/frunk_open"
+    )
     tracker_entry = entity_registry.async_get("device_tracker.roadrunner")
     assert tracker_entry.unique_id == "teslamate/cars/1/location"
     assert tracker_entry.entity_category is None
@@ -517,6 +551,15 @@ async def test_entities(
     )
     assert entity_registry.async_get("sensor.roadrunner_elevation").unique_id == (
         "teslamate/cars/1/elevation"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_exterior_color").unique_id == (
+        "teslamate/cars/1/exterior_color"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_geofence").unique_id == (
+        "teslamate/cars/1/geofence"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_heading").unique_id == (
+        "teslamate/cars/1/heading"
     )
     assert entity_registry.async_get("sensor.roadrunner_range_estimated").unique_id == (
         "teslamate/cars/1/est_battery_range_km"
