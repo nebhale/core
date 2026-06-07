@@ -1,0 +1,27 @@
+tests/components/teslamate_mqtt/test_entity.py
+  s_0d74dbca93a265::t_a2e2fba6a08b06 967-969,1055-1056
+  s_0d74dbca93a265::t_d6e3320b612227 156,232,250,297,366-370,471-480
+homeassistant/components/teslamate_mqtt/const.py
+  s_0d74dbca93a265::t_c172bbf115a2d8 66,68
+homeassistant/components/teslamate_mqtt/binary_sensor.py
+  s_0d74dbca93a265::t_bc1df321e822e3 32,64,178-187
+homeassistant/components/teslamate_mqtt/sensor.py
+  s_0d74dbca93a265::t_f95c6ac142f1c6 161,164,166-167,171-181
+  s_0d74dbca93a265::t_a11de08220bf4c 65,133,162-163,165,168-170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "48d2fa675656cd469f36a6a489bbc875893c163d",
+  "prompts": {},
+  "sessions": {
+    "s_0d74dbca93a265": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea25b-c26e-7443-ad27-4d788d6d0473",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Ben Hale <nebhale@nebhale.com>"
+    }
+  }
+}
