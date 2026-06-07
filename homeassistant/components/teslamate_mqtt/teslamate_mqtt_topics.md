@@ -51,12 +51,12 @@
 | `since` | `Last Seen` | `timestamp` |  | `mdi:timer-sand` |  | Parse the value as a timestamp and use it as-is. |  |
 | `speed` | `Speed` | `speed` | `measurement` | `mdi:speedometer` | `km/h` | Use zero digits of precision |  |
 | `spoiler_type` | `Spoiler Type` |  |  | `mdi:weather-windy` |  |  |  |
-| `state` | `Charging` | `battery_charging` |  |  |  | ``{{ "ON" if value == "charging" else "OFF" }}`` | `Also published raw state topic; discovery uses it as Charging binary sensor.` |
+| `state` | `State` |  |  | `mdi:car-connected` |  | Preserve the TeslaMate vehicle state as a human-readable string, but title case the value. |  |
 | `time_to_full_charge` | `Time to Charged` | `duration` | `measurement` | `mdi:timer` | `h` |  |  |
-| `tpms_pressure_fl` | `Tire Pressure (Front Left)` | `pressure` | `measurement` | `mdi:gauge` | `unitsCfg.Pressure.PressureUnits()` | `unitsCfg.Pressure.PressureValueTemplate()` |  |
-| `tpms_pressure_fr` | `Tire Pressure (Front Right)` | `pressure` | `measurement` | `mdi:gauge` | `unitsCfg.Pressure.PressureUnits()` | `unitsCfg.Pressure.PressureValueTemplate()` |  |
-| `tpms_pressure_rl` | `Tire Pressure (Rear Left)` | `pressure` | `measurement` | `mdi:gauge` | `unitsCfg.Pressure.PressureUnits()` | `unitsCfg.Pressure.PressureValueTemplate()` |  |
-| `tpms_pressure_rr` | `Tire Pressure (Rear Right)` | `pressure` | `measurement` | `mdi:gauge` | `unitsCfg.Pressure.PressureUnits()` | `unitsCfg.Pressure.PressureValueTemplate()` |  |
+| `tpms_pressure_fl` | `Tire Pressure (Front Left)` | `pressure` | `measurement` | `mdi:gauge` | `bar` | Use one digit of precision |  |
+| `tpms_pressure_fr` | `Tire Pressure (Front Right)` | `pressure` | `measurement` | `mdi:gauge` | `bar` | Use one digit of precision |  |
+| `tpms_pressure_rl` | `Tire Pressure (Rear Left)` | `pressure` | `measurement` | `mdi:gauge` | `bar` | Use one digit of precision |  |
+| `tpms_pressure_rr` | `Tire Pressure (Rear Right)` | `pressure` | `measurement` | `mdi:gauge` | `bar` | Use one digit of precision |  |
 | `tpms_soft_warning_fl` | `Tire Soft (Front Left)` | `problem` |  | `mdi:car-tire-alert` |  |  |  |
 | `tpms_soft_warning_fr` | `Tire Soft (Front Right)` | `problem` |  | `mdi:car-tire-alert` |  |  |  |
 | `tpms_soft_warning_rl` | `Tire Soft (Rear Left)` | `problem` |  | `mdi:car-tire-alert` |  |  |  |
