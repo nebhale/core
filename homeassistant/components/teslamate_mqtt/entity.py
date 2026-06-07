@@ -15,6 +15,7 @@ class TeslaMateMqttEntity(Entity):
     def __init__(self, data: TeslaMateMqttData, key: str) -> None:
         """Initialize the entity."""
         self.data = data
+        self.key = key
         self._attr_unique_id = f"{data.topic_root}/{key}"
 
     @property

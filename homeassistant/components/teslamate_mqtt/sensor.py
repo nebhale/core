@@ -7,12 +7,18 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE
+from homeassistant.const import PERCENTAGE, UnitOfElectricCurrent
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import TeslaMateMqttConfigEntry
-from .const import TOPIC_BATTERY_LEVEL, TOPIC_CENTER_DISPLAY_STATE, TOPIC_VERSION
+from .const import (
+    TOPIC_BATTERY_LEVEL,
+    TOPIC_CENTER_DISPLAY_STATE,
+    TOPIC_CHARGE_CURRENT_REQUEST,
+    TOPIC_CHARGE_CURRENT_REQUEST_MAX,
+    TOPIC_VERSION,
+)
 from .entity import TeslaMateMqttEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,6 +48,8 @@ async def async_setup_entry(
         [
             TeslaMateBatteryLevelSensor(entry.runtime_data),
             TeslaMateCenterDisplayStateSensor(entry.runtime_data),
+            TeslaMateChargeCurrentRequestSensor(entry.runtime_data),
+            TeslaMateChargeCurrentRequestMaxSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -68,6 +76,45 @@ class TeslaMateBatteryLevelSensor(TeslaMateMqttEntity, SensorEntity):
             return int(value)
         except ValueError:
             return None
+
+
+class TeslaMateCurrentSensor(TeslaMateMqttEntity, SensorEntity):
+    """Base class for TeslaMate current sensors."""
+
+    _attr_device_class = SensorDeviceClass.CURRENT
+    _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 0
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the current."""
+        if (value := self.data.value(self.key)) is None:
+            return None
+        try:
+            return int(value)
+        except ValueError:
+            return None
+
+
+class TeslaMateChargeCurrentRequestSensor(TeslaMateCurrentSensor):
+    """Representation of the Tesla charge current request."""
+
+    _attr_name = "Charge Current Request"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_CHARGE_CURRENT_REQUEST)
+
+
+class TeslaMateChargeCurrentRequestMaxSensor(TeslaMateCurrentSensor):
+    """Representation of the Tesla maximum charge current request."""
+
+    _attr_name = "Charge Current Request (Max)"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_CHARGE_CURRENT_REQUEST_MAX)
 
 
 class TeslaMateCenterDisplayStateSensor(TeslaMateMqttEntity, SensorEntity):

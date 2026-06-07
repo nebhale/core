@@ -26,6 +26,7 @@ from homeassistant.const import (
     STATE_OFF,
     STATE_ON,
     STATE_UNKNOWN,
+    UnitOfElectricCurrent,
 )
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr, entity_registry as er
@@ -111,6 +112,12 @@ async def test_entities(
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_charge_current_request").state == (
+        STATE_UNKNOWN
+    )
+    assert hass.states.get("sensor.roadrunner_charge_current_request_max").state == (
+        STATE_UNKNOWN
+    )
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/doors_open", "true")
@@ -118,6 +125,8 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
     async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
     async_fire_mqtt_message(hass, "teslamate/cars/1/center_display_state", "8")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charge_current_request", "24")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charge_current_request_max", "48")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -147,6 +156,46 @@ async def test_entities(
     assert center_display_state.attributes[ATTR_ICON] == "mdi:television"
     assert center_display_state.attributes["raw_value"] == "8"
 
+    charge_current_request_state = hass.states.get(
+        "sensor.roadrunner_charge_current_request"
+    )
+    assert charge_current_request_state.state == "24"
+    assert (
+        charge_current_request_state.attributes[ATTR_DEVICE_CLASS]
+        == SensorDeviceClass.CURRENT
+    )
+    assert (
+        charge_current_request_state.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert (
+        charge_current_request_state.attributes[ATTR_UNIT_OF_MEASUREMENT]
+        == UnitOfElectricCurrent.AMPERE
+    )
+    assert entity_registry.async_get(
+        "sensor.roadrunner_charge_current_request"
+    ).options["sensor"]["suggested_display_precision"] == 0
+
+    charge_current_request_max_state = hass.states.get(
+        "sensor.roadrunner_charge_current_request_max"
+    )
+    assert charge_current_request_max_state.state == "48"
+    assert (
+        charge_current_request_max_state.attributes[ATTR_DEVICE_CLASS]
+        == SensorDeviceClass.CURRENT
+    )
+    assert (
+        charge_current_request_max_state.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert (
+        charge_current_request_max_state.attributes[ATTR_UNIT_OF_MEASUREMENT]
+        == UnitOfElectricCurrent.AMPERE
+    )
+    assert entity_registry.async_get(
+        "sensor.roadrunner_charge_current_request_max"
+    ).options["sensor"]["suggested_display_precision"] == 0
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -174,6 +223,12 @@ async def test_entities(
     assert entity_registry.async_get("sensor.roadrunner_center_display").unique_id == (
         "teslamate/cars/1/center_display_state"
     )
+    assert entity_registry.async_get(
+        "sensor.roadrunner_charge_current_request"
+    ).unique_id == "teslamate/cars/1/charge_current_request"
+    assert entity_registry.async_get(
+        "sensor.roadrunner_charge_current_request_max"
+    ).unique_id == "teslamate/cars/1/charge_current_request_max"
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"
     )
