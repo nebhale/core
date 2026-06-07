@@ -140,6 +140,9 @@ async def test_entities(
     assert hass.states.get("binary_sensor.roadrunner_occupancy").state == STATE_UNKNOWN
     assert hass.states.get("binary_sensor.roadrunner_lock").state == STATE_UNKNOWN
     assert hass.states.get("binary_sensor.roadrunner_plug").state == STATE_UNKNOWN
+    assert hass.states.get("binary_sensor.roadrunner_sentry_mode").state == (
+        STATE_UNKNOWN
+    )
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
@@ -176,6 +179,8 @@ async def test_entities(
     assert hass.states.get(
         "sensor.roadrunner_charging_start_time"
     ).state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_shift_state").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_last_seen").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -195,6 +200,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/is_user_present", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/locked", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/plugged_in", "true")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/sentry_mode", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/latitude", "37.123")
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
     async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
@@ -225,6 +231,8 @@ async def test_entities(
         "teslamate/cars/1/scheduled_charging_start_time",
         "2026-06-07T12:34:56+00:00",
     )
+    async_fire_mqtt_message(hass, "teslamate/cars/1/shift_state", "D")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/since", "2026-06-07T12:00:00+00:00")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -321,6 +329,11 @@ async def test_entities(
     plug_state = hass.states.get("binary_sensor.roadrunner_plug")
     assert plug_state.state == STATE_ON
     assert plug_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.PLUG
+
+    sentry_mode = hass.states.get("binary_sensor.roadrunner_sentry_mode")
+    assert sentry_mode.state == STATE_ON
+    assert sentry_mode.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.RUNNING
+    assert sentry_mode.attributes[ATTR_ICON] == "mdi:cctv"
 
     tracker_state = hass.states.get("device_tracker.roadrunner")
     assert tracker_state.state == "not_home"
@@ -584,6 +597,15 @@ async def test_entities(
         == SensorDeviceClass.TIMESTAMP
     )
 
+    shift_state = hass.states.get("sensor.roadrunner_shift_state")
+    assert shift_state.state == "D"
+    assert shift_state.attributes[ATTR_ICON] == "mdi:car-shift-pattern"
+
+    since = hass.states.get("sensor.roadrunner_last_seen")
+    assert since.state == "2026-06-07T12:00:00+00:00"
+    assert since.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.TIMESTAMP
+    assert since.attributes[ATTR_ICON] == "mdi:timer-sand"
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -638,6 +660,9 @@ async def test_entities(
     assert entity_registry.async_get("binary_sensor.roadrunner_plug").unique_id == (
         "teslamate/cars/1/plugged_in"
     )
+    assert entity_registry.async_get(
+        "binary_sensor.roadrunner_sentry_mode"
+    ).unique_id == "teslamate/cars/1/sentry_mode"
     tracker_entry = entity_registry.async_get("device_tracker.roadrunner")
     assert tracker_entry.unique_id == "teslamate/cars/1/location"
     assert tracker_entry.entity_category is None
@@ -714,6 +739,12 @@ async def test_entities(
     assert entity_registry.async_get(
         "sensor.roadrunner_charging_start_time"
     ).unique_id == "teslamate/cars/1/scheduled_charging_start_time"
+    assert entity_registry.async_get("sensor.roadrunner_shift_state").unique_id == (
+        "teslamate/cars/1/shift_state"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_last_seen").unique_id == (
+        "teslamate/cars/1/since"
+    )
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"
     )

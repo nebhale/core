@@ -46,9 +46,9 @@
 | `power` | `Power` | `power` | `measurement` |  | `kW` | Use zero digits of precision |  |
 | `rated_battery_range_km` | `Range (Rated)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
 | `scheduled_charging_start_time` | `Charging Start Time` | `timestamp` |  |  |  | Parse the value as a timestamp and use it as-is. |  |
-| `sentry_mode` | `Sentry Mode` |  |  | `mdi:cctv` |  |  |  |
+| `sentry_mode` | `Sentry Mode` | `running` |  | `mdi:cctv` |  |  |  |
 | `shift_state` | `Shift State` |  |  | `mdi:car-shift-pattern` |  |  |  |
-| `since` | `Last Seen` |  |  | `mdi:timer-sand` |  |  |  |
+| `since` | `Last Seen` | `timestamp` |  | `mdi:timer-sand` |  | Parse the value as a timestamp and use it as-is. |  |
 | `speed` | `Speed` |  | `measurement` | `mdi:speedometer` | `unitsCfg.Distance.SpeedUnits()` | `unitsCfg.Distance.SpeedValueTemplate()` |  |
 | `spoiler_type` | `Spoiler Type` |  |  | `mdi:weather-windy` |  |  |  |
 | `state` | `Charging` | `battery_charging` |  |  |  | ``{{ "ON" if value == "charging" else "OFF" }}`` | `Also published raw state topic; discovery uses it as Charging binary sensor.` |

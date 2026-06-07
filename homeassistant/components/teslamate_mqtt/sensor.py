@@ -49,6 +49,8 @@ from .const import (
     TOPIC_POWER,
     TOPIC_RATED_BATTERY_RANGE_KM,
     TOPIC_SCHEDULED_CHARGING_START_TIME,
+    TOPIC_SHIFT_STATE,
+    TOPIC_SINCE,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -107,6 +109,8 @@ async def async_setup_entry(
             TeslaMatePowerSensor(entry.runtime_data),
             TeslaMateRatedBatteryRangeSensor(entry.runtime_data),
             TeslaMateScheduledChargingStartTimeSensor(entry.runtime_data),
+            TeslaMateShiftStateSensor(entry.runtime_data),
+            TeslaMateSinceSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -461,6 +465,41 @@ class TeslaMateScheduledChargingStartTimeSensor(TeslaMateMqttEntity, SensorEntit
     def native_value(self) -> datetime | None:
         """Return the scheduled charging start time."""
         if (value := self.data.value(TOPIC_SCHEDULED_CHARGING_START_TIME)) is None:
+            return None
+        return dt_util.parse_datetime(value)
+
+
+class TeslaMateShiftStateSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla shift state."""
+
+    _attr_icon = "mdi:car-shift-pattern"
+    _attr_name = "Shift State"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_SHIFT_STATE)
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the shift state."""
+        return self.data.value(TOPIC_SHIFT_STATE)
+
+
+class TeslaMateSinceSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of when TeslaMate last saw the Tesla."""
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_icon = "mdi:timer-sand"
+    _attr_name = "Last Seen"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_SINCE)
+
+    @property
+    def native_value(self) -> datetime | None:
+        """Return when TeslaMate last saw the Tesla."""
+        if (value := self.data.value(TOPIC_SINCE)) is None:
             return None
         return dt_util.parse_datetime(value)
 

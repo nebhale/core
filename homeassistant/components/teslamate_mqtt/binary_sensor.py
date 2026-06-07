@@ -22,6 +22,7 @@ from .const import (
     TOPIC_PASSENGER_FRONT_DOOR_OPEN,
     TOPIC_PASSENGER_REAR_DOOR_OPEN,
     TOPIC_PLUGGED_IN,
+    TOPIC_SENTRY_MODE,
 )
 from .entity import TeslaMateMqttEntity
 
@@ -47,6 +48,7 @@ async def async_setup_entry(
             TeslaMateUserPresentBinarySensor(entry.runtime_data),
             TeslaMateLockedBinarySensor(entry.runtime_data),
             TeslaMatePluggedInBinarySensor(entry.runtime_data),
+            TeslaMateSentryModeBinarySensor(entry.runtime_data),
         ]
     )
 
@@ -233,3 +235,15 @@ class TeslaMatePluggedInBinarySensor(TeslaMateBooleanBinarySensor):
     def __init__(self, data) -> None:
         """Initialize the binary sensor."""
         super().__init__(data, TOPIC_PLUGGED_IN)
+
+
+class TeslaMateSentryModeBinarySensor(TeslaMateBooleanBinarySensor):
+    """Representation of whether Sentry Mode is active."""
+
+    _attr_device_class = BinarySensorDeviceClass.RUNNING
+    _attr_icon = "mdi:cctv"
+    _attr_name = "Sentry Mode"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_SENTRY_MODE)
