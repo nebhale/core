@@ -9,6 +9,7 @@ from unittest.mock import patch
 import pytest
 
 from homeassistant.components import mqtt
+from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.components.sensor import (
     ATTR_STATE_CLASS,
     SensorDeviceClass,
@@ -109,6 +110,9 @@ async def test_entities(
     """Test TeslaMate MQTT entities."""
     entry = await _async_setup_entry(hass)
 
+    assert hass.states.get("binary_sensor.roadrunner_charge_port").state == (
+        STATE_UNKNOWN
+    )
     assert hass.states.get("binary_sensor.roadrunner_doors").state == STATE_UNKNOWN
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
@@ -121,8 +125,10 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_charge_current_request_max").state == (
         STATE_UNKNOWN
     )
+    assert hass.states.get("sensor.roadrunner_charger_current").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/doors_open", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/latitude", "37.123")
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
@@ -132,10 +138,16 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_limit_soc", "80")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_current_request", "24")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_current_request_max", "48")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charger_actual_current", "40")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
     await hass.async_block_till_done()
+
+    charge_port_state = hass.states.get("binary_sensor.roadrunner_charge_port")
+    assert charge_port_state.state == STATE_ON
+    assert charge_port_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.DOOR
+    assert charge_port_state.attributes[ATTR_ICON] == "mdi:ev-plug-tesla"
 
     assert hass.states.get("binary_sensor.roadrunner_doors").state == STATE_ON
     assert (
@@ -231,6 +243,24 @@ async def test_entities(
         "sensor.roadrunner_charge_current_request_max"
     ).options["sensor"]["suggested_display_precision"] == 0
 
+    charger_actual_current_state = hass.states.get("sensor.roadrunner_charger_current")
+    assert charger_actual_current_state.state == "40"
+    assert (
+        charger_actual_current_state.attributes[ATTR_DEVICE_CLASS]
+        == SensorDeviceClass.CURRENT
+    )
+    assert (
+        charger_actual_current_state.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert (
+        charger_actual_current_state.attributes[ATTR_UNIT_OF_MEASUREMENT]
+        == UnitOfElectricCurrent.AMPERE
+    )
+    assert entity_registry.async_get("sensor.roadrunner_charger_current").options[
+        "sensor"
+    ]["suggested_display_precision"] == 0
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -246,6 +276,9 @@ async def test_entities(
     assert device.model == "Model 3 Performance"
     assert device.sw_version == "2026.14.1"
 
+    assert entity_registry.async_get(
+        "binary_sensor.roadrunner_charge_port"
+    ).unique_id == "teslamate/cars/1/charge_port_door_open"
     assert entity_registry.async_get("binary_sensor.roadrunner_doors").unique_id == (
         "teslamate/cars/1/doors_open"
     )
@@ -270,6 +303,9 @@ async def test_entities(
     assert entity_registry.async_get(
         "sensor.roadrunner_charge_current_request_max"
     ).unique_id == "teslamate/cars/1/charge_current_request_max"
+    assert entity_registry.async_get("sensor.roadrunner_charger_current").unique_id == (
+        "teslamate/cars/1/charger_actual_current"
+    )
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"
     )

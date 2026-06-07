@@ -19,6 +19,7 @@ from .const import (
     TOPIC_CHARGE_CURRENT_REQUEST_MAX,
     TOPIC_CHARGE_ENERGY_ADDED,
     TOPIC_CHARGE_LIMIT_SOC,
+    TOPIC_CHARGER_ACTUAL_CURRENT,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -54,6 +55,7 @@ async def async_setup_entry(
             TeslaMateChargeLimitSocSensor(entry.runtime_data),
             TeslaMateChargeCurrentRequestSensor(entry.runtime_data),
             TeslaMateChargeCurrentRequestMaxSensor(entry.runtime_data),
+            TeslaMateChargerActualCurrentSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -119,6 +121,16 @@ class TeslaMateChargeCurrentRequestMaxSensor(TeslaMateCurrentSensor):
     def __init__(self, data) -> None:
         """Initialize the sensor."""
         super().__init__(data, TOPIC_CHARGE_CURRENT_REQUEST_MAX)
+
+
+class TeslaMateChargerActualCurrentSensor(TeslaMateCurrentSensor):
+    """Representation of the Tesla charger current."""
+
+    _attr_name = "Charger Current"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_CHARGER_ACTUAL_CURRENT)
 
 
 class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):
