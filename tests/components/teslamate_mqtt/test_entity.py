@@ -132,6 +132,7 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_charger_power").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_charger_voltage").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_charging_state").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_climate_keeper").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -149,6 +150,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/charger_power", "11")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charger_voltage", "240")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charging_state", "NoPower")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/climate_keeper_mode", "dog")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -320,6 +322,10 @@ async def test_entities(
     assert charging_state.state == "No Power"
     assert charging_state.attributes[ATTR_ICON] == "mdi:ev-station"
 
+    climate_keeper = hass.states.get("sensor.roadrunner_climate_keeper")
+    assert climate_keeper.state == "Dog"
+    assert climate_keeper.attributes[ATTR_ICON] == "mdi:air-conditioner"
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -377,6 +383,9 @@ async def test_entities(
     assert entity_registry.async_get("sensor.roadrunner_charging_state").unique_id == (
         "teslamate/cars/1/charging_state"
     )
+    assert entity_registry.async_get("sensor.roadrunner_climate_keeper").unique_id == (
+        "teslamate/cars/1/climate_keeper_mode"
+    )
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"
     )
@@ -412,6 +421,25 @@ async def test_charging_state_values(
     await hass.async_block_till_done()
 
     assert hass.states.get("sensor.roadrunner_charging_state").state == state
+
+
+@pytest.mark.parametrize(
+    ("payload", "state"),
+    [
+        pytest.param("off", "Off", id="lowercase"),
+        pytest.param("DOG", "Dog", id="uppercase"),
+    ],
+)
+async def test_climate_keeper_mode_values(
+    hass: HomeAssistant, mqtt_mock: MqttMockHAClient, payload: str, state: str
+) -> None:
+    """Test climate keeper mode value formatting."""
+    await _async_setup_entry(hass)
+
+    async_fire_mqtt_message(hass, "teslamate/cars/1/climate_keeper_mode", payload)
+    await hass.async_block_till_done()
+
+    assert hass.states.get("sensor.roadrunner_climate_keeper").state == state
 
 
 @pytest.mark.parametrize(

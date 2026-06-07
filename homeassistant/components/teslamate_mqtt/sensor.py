@@ -31,6 +31,7 @@ from .const import (
     TOPIC_CHARGER_POWER,
     TOPIC_CHARGER_VOLTAGE,
     TOPIC_CHARGING_STATE,
+    TOPIC_CLIMATE_KEEPER_MODE,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -71,6 +72,7 @@ async def async_setup_entry(
             TeslaMateChargerPowerSensor(entry.runtime_data),
             TeslaMateChargerVoltageSensor(entry.runtime_data),
             TeslaMateChargingStateSensor(entry.runtime_data),
+            TeslaMateClimateKeeperModeSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -217,6 +219,24 @@ class TeslaMateChargingStateSensor(TeslaMateMqttEntity, SensorEntity):
         if (value := self.data.value(TOPIC_CHARGING_STATE)) is None:
             return None
         return re.sub(r"(?<=[a-z])(?=[A-Z])", " ", value)
+
+
+class TeslaMateClimateKeeperModeSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla climate keeper mode."""
+
+    _attr_icon = "mdi:air-conditioner"
+    _attr_name = "Climate Keeper"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_CLIMATE_KEEPER_MODE)
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the climate keeper mode."""
+        if (value := self.data.value(TOPIC_CLIMATE_KEEPER_MODE)) is None:
+            return None
+        return value.title()
 
 
 class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):
