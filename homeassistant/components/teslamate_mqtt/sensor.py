@@ -7,7 +7,7 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, UnitOfElectricCurrent
+from homeassistant.const import PERCENTAGE, UnitOfElectricCurrent, UnitOfEnergy
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -17,6 +17,7 @@ from .const import (
     TOPIC_CENTER_DISPLAY_STATE,
     TOPIC_CHARGE_CURRENT_REQUEST,
     TOPIC_CHARGE_CURRENT_REQUEST_MAX,
+    TOPIC_CHARGE_ENERGY_ADDED,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -48,6 +49,7 @@ async def async_setup_entry(
         [
             TeslaMateBatteryLevelSensor(entry.runtime_data),
             TeslaMateCenterDisplayStateSensor(entry.runtime_data),
+            TeslaMateChargeEnergyAddedSensor(entry.runtime_data),
             TeslaMateChargeCurrentRequestSensor(entry.runtime_data),
             TeslaMateChargeCurrentRequestMaxSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
@@ -115,6 +117,30 @@ class TeslaMateChargeCurrentRequestMaxSensor(TeslaMateCurrentSensor):
     def __init__(self, data) -> None:
         """Initialize the sensor."""
         super().__init__(data, TOPIC_CHARGE_CURRENT_REQUEST_MAX)
+
+
+class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla charge energy added."""
+
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_name = "Energy Added"
+    _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_suggested_display_precision = 1
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_CHARGE_ENERGY_ADDED)
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the charge energy added."""
+        if (value := self.data.value(TOPIC_CHARGE_ENERGY_ADDED)) is None:
+            return None
+        try:
+            return float(value)
+        except ValueError:
+            return None
 
 
 class TeslaMateCenterDisplayStateSensor(TeslaMateMqttEntity, SensorEntity):

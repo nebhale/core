@@ -27,6 +27,7 @@ from homeassistant.const import (
     STATE_ON,
     STATE_UNKNOWN,
     UnitOfElectricCurrent,
+    UnitOfEnergy,
 )
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr, entity_registry as er
@@ -112,6 +113,7 @@ async def test_entities(
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_energy_added").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_charge_current_request").state == (
         STATE_UNKNOWN
     )
@@ -125,6 +127,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
     async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
     async_fire_mqtt_message(hass, "teslamate/cars/1/center_display_state", "8")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charge_energy_added", "12.3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_current_request", "24")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_current_request_max", "48")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
@@ -155,6 +158,24 @@ async def test_entities(
     assert center_display_state.state == "dog_mode"
     assert center_display_state.attributes[ATTR_ICON] == "mdi:television"
     assert center_display_state.attributes["raw_value"] == "8"
+
+    charge_energy_added_state = hass.states.get("sensor.roadrunner_energy_added")
+    assert charge_energy_added_state.state == "12.3"
+    assert (
+        charge_energy_added_state.attributes[ATTR_DEVICE_CLASS]
+        == SensorDeviceClass.ENERGY
+    )
+    assert (
+        charge_energy_added_state.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.TOTAL_INCREASING
+    )
+    assert (
+        charge_energy_added_state.attributes[ATTR_UNIT_OF_MEASUREMENT]
+        == UnitOfEnergy.KILO_WATT_HOUR
+    )
+    assert entity_registry.async_get(
+        "sensor.roadrunner_energy_added"
+    ).options["sensor"]["suggested_display_precision"] == 1
 
     charge_current_request_state = hass.states.get(
         "sensor.roadrunner_charge_current_request"
@@ -223,6 +244,9 @@ async def test_entities(
     assert entity_registry.async_get("sensor.roadrunner_center_display").unique_id == (
         "teslamate/cars/1/center_display_state"
     )
+    assert entity_registry.async_get("sensor.roadrunner_energy_added").unique_id == (
+        "teslamate/cars/1/charge_energy_added"
+    )
     assert entity_registry.async_get(
         "sensor.roadrunner_charge_current_request"
     ).unique_id == "teslamate/cars/1/charge_current_request"
@@ -240,6 +264,11 @@ async def test_entities(
 
     assert hass.states.get("binary_sensor.roadrunner_doors").state == STATE_OFF
     assert entry.title == "Bluebird"
+
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charge_energy_added", "1.1")
+    await hass.async_block_till_done()
+
+    assert hass.states.get("sensor.roadrunner_energy_added").state == "1.1"
 
 
 @pytest.mark.parametrize(

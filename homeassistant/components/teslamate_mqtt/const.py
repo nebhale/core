@@ -5,6 +5,7 @@ DOMAIN = "teslamate_mqtt"
 
 TOPIC_BATTERY_LEVEL = "battery_level"
 TOPIC_CENTER_DISPLAY_STATE = "center_display_state"
+TOPIC_CHARGE_ENERGY_ADDED = "charge_energy_added"
 TOPIC_CHARGE_CURRENT_REQUEST = "charge_current_request"
 TOPIC_CHARGE_CURRENT_REQUEST_MAX = "charge_current_request_max"
 TOPIC_DISPLAY_NAME = "display_name"
