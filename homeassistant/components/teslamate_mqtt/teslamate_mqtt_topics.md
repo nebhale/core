@@ -22,13 +22,13 @@
 | `driver_front_door_open` | `Door (Driver Front)` | `door` |  | `mdi:car-door` |  |  |  |
 | `driver_rear_door_open` | `Door (Driver Rear)` | `door` |  | `mdi:car-door` |  |  |  |
 | `elevation` | `Elevation` | `distance` | `measurement` | `mdi:image-filter-hdr` | `m` | Use zero digits of precision |  |
-| `est_battery_range_km` | `Range (Estimated)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
+| `est_battery_range_km` | `Range (Estimated)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use zero digits of precision | |
 | `exterior_color` | `Exterior Color` |  |  | `mdi:format-color-fill` |  | Preserve the TeslaMate exterior color as a human-readable string, but split camel-case words into space-separated words. For example, `DeepBlue` should display as `Deep Blue`. |  |
 | `frunk_open` | `Frunk` | `door` |  | `mdi:car` |  |  |  |
 | `geofence` | `Geofence` |  |  | `mdi:earth` |  |  |  |
 | `heading` | `Heading` |  | `measurement` | `mdi:compass` | `°` | Use zero digits of precision |  |
 | `healthy` | `Health` | `problem` |  | `mdi:heart-pulse` |  | Treat the TeslaMate healthy value as a Home Assistant problem binary sensor. Because TeslaMate publishes `true` when there are no problems and `false` when there are problems, invert the value so `true` reports off/no problem and `false` reports on/problem. |  |
-| `ideal_battery_range_km` | `Range (Ideal)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
+| `ideal_battery_range_km` | `Range (Ideal)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use zero digits of precision | |
 | `inside_temp` | `Temperature (Inside)` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
 | `is_climate_on` | `Climate` | `running` |  | `mdi:air-conditioner` |  |  |  |
 | `is_preconditioning` | `Preconditioning` | `running` |  | `mdi:air-conditioner` |  |  |  |
@@ -38,18 +38,18 @@
 | `locked` | `Lock` | `lock` |  |  |  | Treat the TeslaMate locked value as a Home Assistant lock binary sensor. Because TeslaMate publishes `true` when the car is locked and `false` when the car is unlocked, invert the value so `true` reports off/locked and `false` reports on/unlocked. |  |
 | `longitude` | `Longitude` |  | `measurement` | `mdi:longitude` | `°` |  | Used by the device tracker rather than exposed as a standalone sensor. |
 | `model` | `Model` |  |  | `mdi:form-textbox` |  |  | Used as the Home Assistant device name, so it is not exposed as a standalone sensor. |
-| `odometer` | `Odometer` | `distance` | `total_increasing` | `mdi:counter` | `km` | Use one digit of precision |  |
+| `odometer` | `Odometer` | `distance` | `total_increasing` | `mdi:counter` | `km` | Use zero digits of precision |  |
 | `outside_temp` | `Temperature (Outside)` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
 | `passenger_front_door_open` | `Door (Passenger Front)` | `door` |  | `mdi:car-door` |  |  |  |
 | `passenger_rear_door_open` | `Door (Passenger Rear)` | `door` |  | `mdi:car-door` |  |  |  |
 | `plugged_in` | `Plug` | `plug` |  |  |  |  |  |
 | `power` | `Power` | `power` | `measurement` |  | `kW` | Use zero digits of precision |  |
-| `rated_battery_range_km` | `Range (Rated)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
+| `rated_battery_range_km` | `Range (Rated)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use zero digits of precision | |
 | `scheduled_charging_start_time` | `Charging Start Time` | `timestamp` |  |  |  | Parse the value as a timestamp and use it as-is. |  |
 | `sentry_mode` | `Sentry Mode` | `running` |  | `mdi:cctv` |  |  |  |
 | `shift_state` | `Shift State` |  |  | `mdi:car-shift-pattern` |  |  |  |
 | `since` | `Last Seen` | `timestamp` |  | `mdi:timer-sand` |  | Parse the value as a timestamp and use it as-is. |  |
-| `speed` | `Speed` |  | `measurement` | `mdi:speedometer` | `unitsCfg.Distance.SpeedUnits()` | `unitsCfg.Distance.SpeedValueTemplate()` |  |
+| `speed` | `Speed` | `speed` | `measurement` | `mdi:speedometer` | `km/h` | Use zero digits of precision |  |
 | `spoiler_type` | `Spoiler Type` |  |  | `mdi:weather-windy` |  |  |  |
 | `state` | `Charging` | `battery_charging` |  |  |  | ``{{ "ON" if value == "charging" else "OFF" }}`` | `Also published raw state topic; discovery uses it as Charging binary sensor.` |
 | `time_to_full_charge` | `Time to Charged` | `duration` | `measurement` | `mdi:timer` | `h` |  |  |

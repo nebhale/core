@@ -33,6 +33,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfLength,
     UnitOfPower,
+    UnitOfSpeed,
     UnitOfTemperature,
 )
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
@@ -181,6 +182,7 @@ async def test_entities(
     ).state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_shift_state").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_last_seen").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_speed").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -233,6 +235,7 @@ async def test_entities(
     )
     async_fire_mqtt_message(hass, "teslamate/cars/1/shift_state", "D")
     async_fire_mqtt_message(hass, "teslamate/cars/1/since", "2026-06-07T12:00:00+00:00")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/speed", "88")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -547,7 +550,7 @@ async def test_entities(
     assert odometer.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfLength.KILOMETERS
     assert entity_registry.async_get("sensor.roadrunner_odometer").options["sensor"][
         "suggested_display_precision"
-    ] == 1
+    ] == 0
 
     power = hass.states.get("sensor.roadrunner_power")
     assert power.state == "-7"
@@ -566,7 +569,7 @@ async def test_entities(
     assert estimated_range.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfLength.KILOMETERS
     assert entity_registry.async_get("sensor.roadrunner_range_estimated").options[
         "sensor"
-    ]["suggested_display_precision"] == 1
+    ]["suggested_display_precision"] == 0
 
     ideal_range = hass.states.get("sensor.roadrunner_range_ideal")
     assert ideal_range.state == "330.1"
@@ -576,7 +579,7 @@ async def test_entities(
     assert ideal_range.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfLength.KILOMETERS
     assert entity_registry.async_get("sensor.roadrunner_range_ideal").options[
         "sensor"
-    ]["suggested_display_precision"] == 1
+    ]["suggested_display_precision"] == 0
 
     rated_range = hass.states.get("sensor.roadrunner_range_rated")
     assert rated_range.state == "325.7"
@@ -586,7 +589,7 @@ async def test_entities(
     assert rated_range.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfLength.KILOMETERS
     assert entity_registry.async_get("sensor.roadrunner_range_rated").options["sensor"][
         "suggested_display_precision"
-    ] == 1
+    ] == 0
 
     scheduled_start_time = hass.states.get(
         "sensor.roadrunner_charging_start_time"
@@ -605,6 +608,16 @@ async def test_entities(
     assert since.state == "2026-06-07T12:00:00+00:00"
     assert since.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.TIMESTAMP
     assert since.attributes[ATTR_ICON] == "mdi:timer-sand"
+
+    speed = hass.states.get("sensor.roadrunner_speed")
+    assert speed.state == "88.0"
+    assert speed.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.SPEED
+    assert speed.attributes[ATTR_ICON] == "mdi:speedometer"
+    assert speed.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
+    assert speed.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfSpeed.KILOMETERS_PER_HOUR
+    assert entity_registry.async_get("sensor.roadrunner_speed").options["sensor"][
+        "suggested_display_precision"
+    ] == 0
 
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
@@ -744,6 +757,9 @@ async def test_entities(
     )
     assert entity_registry.async_get("sensor.roadrunner_last_seen").unique_id == (
         "teslamate/cars/1/since"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_speed").unique_id == (
+        "teslamate/cars/1/speed"
     )
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"

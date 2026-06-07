@@ -17,6 +17,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfLength,
     UnitOfPower,
+    UnitOfSpeed,
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant
@@ -51,6 +52,7 @@ from .const import (
     TOPIC_SCHEDULED_CHARGING_START_TIME,
     TOPIC_SHIFT_STATE,
     TOPIC_SINCE,
+    TOPIC_SPEED,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -111,6 +113,7 @@ async def async_setup_entry(
             TeslaMateScheduledChargingStartTimeSensor(entry.runtime_data),
             TeslaMateShiftStateSensor(entry.runtime_data),
             TeslaMateSinceSensor(entry.runtime_data),
+            TeslaMateSpeedSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -384,7 +387,7 @@ class TeslaMateBatteryRangeSensor(TeslaMateDistanceSensor):
 
     _attr_icon = "mdi:map-marker-distance"
     _attr_native_unit_of_measurement = UnitOfLength.KILOMETERS
-    _attr_suggested_display_precision = 1
+    _attr_suggested_display_precision = 0
 
 
 class TeslaMateEstimatedBatteryRangeSensor(TeslaMateBatteryRangeSensor):
@@ -414,7 +417,7 @@ class TeslaMateOdometerSensor(TeslaMateDistanceSensor):
     _attr_name = "Odometer"
     _attr_native_unit_of_measurement = UnitOfLength.KILOMETERS
     _attr_state_class = SensorStateClass.TOTAL_INCREASING
-    _attr_suggested_display_precision = 1
+    _attr_suggested_display_precision = 0
 
     def __init__(self, data) -> None:
         """Initialize the sensor."""
@@ -502,6 +505,21 @@ class TeslaMateSinceSensor(TeslaMateMqttEntity, SensorEntity):
         if (value := self.data.value(TOPIC_SINCE)) is None:
             return None
         return dt_util.parse_datetime(value)
+
+
+class TeslaMateSpeedSensor(TeslaMateFloatSensor):
+    """Representation of the Tesla speed."""
+
+    _attr_device_class = SensorDeviceClass.SPEED
+    _attr_icon = "mdi:speedometer"
+    _attr_name = "Speed"
+    _attr_native_unit_of_measurement = UnitOfSpeed.KILOMETERS_PER_HOUR
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 0
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_SPEED)
 
 
 class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):
