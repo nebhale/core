@@ -114,6 +114,7 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_energy_added").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_charge_limit").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_charge_current_request").state == (
         STATE_UNKNOWN
     )
@@ -128,6 +129,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
     async_fire_mqtt_message(hass, "teslamate/cars/1/center_display_state", "8")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_energy_added", "12.3")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charge_limit_soc", "80")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_current_request", "24")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_current_request_max", "48")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
@@ -176,6 +178,18 @@ async def test_entities(
     assert entity_registry.async_get(
         "sensor.roadrunner_energy_added"
     ).options["sensor"]["suggested_display_precision"] == 1
+
+    charge_limit_soc_state = hass.states.get("sensor.roadrunner_charge_limit")
+    assert charge_limit_soc_state.state == "80"
+    assert charge_limit_soc_state.attributes[ATTR_ICON] == "mdi:battery-charging-90"
+    assert (
+        charge_limit_soc_state.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert charge_limit_soc_state.attributes[ATTR_UNIT_OF_MEASUREMENT] == PERCENTAGE
+    assert entity_registry.async_get("sensor.roadrunner_charge_limit").options[
+        "sensor"
+    ]["suggested_display_precision"] == 0
 
     charge_current_request_state = hass.states.get(
         "sensor.roadrunner_charge_current_request"
@@ -246,6 +260,9 @@ async def test_entities(
     )
     assert entity_registry.async_get("sensor.roadrunner_energy_added").unique_id == (
         "teslamate/cars/1/charge_energy_added"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_charge_limit").unique_id == (
+        "teslamate/cars/1/charge_limit_soc"
     )
     assert entity_registry.async_get(
         "sensor.roadrunner_charge_current_request"

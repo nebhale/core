@@ -18,6 +18,7 @@ from .const import (
     TOPIC_CHARGE_CURRENT_REQUEST,
     TOPIC_CHARGE_CURRENT_REQUEST_MAX,
     TOPIC_CHARGE_ENERGY_ADDED,
+    TOPIC_CHARGE_LIMIT_SOC,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -50,6 +51,7 @@ async def async_setup_entry(
             TeslaMateBatteryLevelSensor(entry.runtime_data),
             TeslaMateCenterDisplayStateSensor(entry.runtime_data),
             TeslaMateChargeEnergyAddedSensor(entry.runtime_data),
+            TeslaMateChargeLimitSocSensor(entry.runtime_data),
             TeslaMateChargeCurrentRequestSensor(entry.runtime_data),
             TeslaMateChargeCurrentRequestMaxSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
@@ -139,6 +141,30 @@ class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):
             return None
         try:
             return float(value)
+        except ValueError:
+            return None
+
+
+class TeslaMateChargeLimitSocSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla charge limit."""
+
+    _attr_icon = "mdi:battery-charging-90"
+    _attr_name = "Charge Limit"
+    _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 0
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_CHARGE_LIMIT_SOC)
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the charge limit."""
+        if (value := self.data.value(TOPIC_CHARGE_LIMIT_SOC)) is None:
+            return None
+        try:
+            return int(value)
         except ValueError:
             return None
 
