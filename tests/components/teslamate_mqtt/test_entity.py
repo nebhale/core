@@ -116,6 +116,18 @@ async def test_entities(
         STATE_UNKNOWN
     )
     assert hass.states.get("binary_sensor.roadrunner_doors").state == STATE_UNKNOWN
+    assert hass.states.get("binary_sensor.roadrunner_door_driver_front").state == (
+        STATE_UNKNOWN
+    )
+    assert hass.states.get("binary_sensor.roadrunner_door_driver_rear").state == (
+        STATE_UNKNOWN
+    )
+    assert hass.states.get("binary_sensor.roadrunner_door_passenger_front").state == (
+        STATE_UNKNOWN
+    )
+    assert hass.states.get("binary_sensor.roadrunner_door_passenger_rear").state == (
+        STATE_UNKNOWN
+    )
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
@@ -133,10 +145,19 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_charger_voltage").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_charging_state").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_climate_keeper").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_display_name").state == "Roadrunner"
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/doors_open", "true")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/driver_front_door_open", "true")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/driver_rear_door_open", "false")
+    async_fire_mqtt_message(
+        hass, "teslamate/cars/1/passenger_front_door_open", "true"
+    )
+    async_fire_mqtt_message(
+        hass, "teslamate/cars/1/passenger_rear_door_open", "false"
+    )
     async_fire_mqtt_message(hass, "teslamate/cars/1/latitude", "37.123")
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
     async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
@@ -166,6 +187,46 @@ async def test_entities(
         hass.states.get("binary_sensor.roadrunner_doors").attributes[ATTR_ICON]
         == "mdi:car-door"
     )
+
+    driver_front_door_state = hass.states.get(
+        "binary_sensor.roadrunner_door_driver_front"
+    )
+    assert driver_front_door_state.state == STATE_ON
+    assert (
+        driver_front_door_state.attributes[ATTR_DEVICE_CLASS]
+        == BinarySensorDeviceClass.DOOR
+    )
+    assert driver_front_door_state.attributes[ATTR_ICON] == "mdi:car-door"
+
+    driver_rear_door_state = hass.states.get(
+        "binary_sensor.roadrunner_door_driver_rear"
+    )
+    assert driver_rear_door_state.state == STATE_OFF
+    assert (
+        driver_rear_door_state.attributes[ATTR_DEVICE_CLASS]
+        == BinarySensorDeviceClass.DOOR
+    )
+    assert driver_rear_door_state.attributes[ATTR_ICON] == "mdi:car-door"
+
+    passenger_front_door_state = hass.states.get(
+        "binary_sensor.roadrunner_door_passenger_front"
+    )
+    assert passenger_front_door_state.state == STATE_ON
+    assert (
+        passenger_front_door_state.attributes[ATTR_DEVICE_CLASS]
+        == BinarySensorDeviceClass.DOOR
+    )
+    assert passenger_front_door_state.attributes[ATTR_ICON] == "mdi:car-door"
+
+    passenger_rear_door_state = hass.states.get(
+        "binary_sensor.roadrunner_door_passenger_rear"
+    )
+    assert passenger_rear_door_state.state == STATE_OFF
+    assert (
+        passenger_rear_door_state.attributes[ATTR_DEVICE_CLASS]
+        == BinarySensorDeviceClass.DOOR
+    )
+    assert passenger_rear_door_state.attributes[ATTR_ICON] == "mdi:car-door"
 
     tracker_state = hass.states.get("device_tracker.roadrunner")
     assert tracker_state.state == "not_home"
@@ -326,6 +387,10 @@ async def test_entities(
     assert climate_keeper.state == "Dog"
     assert climate_keeper.attributes[ATTR_ICON] == "mdi:air-conditioner"
 
+    display_name = hass.states.get("sensor.roadrunner_display_name")
+    assert display_name.state == "Roadrunner"
+    assert display_name.attributes[ATTR_ICON] == "mdi:form-textbox"
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -347,6 +412,18 @@ async def test_entities(
     assert entity_registry.async_get("binary_sensor.roadrunner_doors").unique_id == (
         "teslamate/cars/1/doors_open"
     )
+    assert entity_registry.async_get(
+        "binary_sensor.roadrunner_door_driver_front"
+    ).unique_id == "teslamate/cars/1/driver_front_door_open"
+    assert entity_registry.async_get(
+        "binary_sensor.roadrunner_door_driver_rear"
+    ).unique_id == "teslamate/cars/1/driver_rear_door_open"
+    assert entity_registry.async_get(
+        "binary_sensor.roadrunner_door_passenger_front"
+    ).unique_id == "teslamate/cars/1/passenger_front_door_open"
+    assert entity_registry.async_get(
+        "binary_sensor.roadrunner_door_passenger_rear"
+    ).unique_id == "teslamate/cars/1/passenger_rear_door_open"
     tracker_entry = entity_registry.async_get("device_tracker.roadrunner")
     assert tracker_entry.unique_id == "teslamate/cars/1/location"
     assert tracker_entry.entity_category is None
@@ -386,6 +463,9 @@ async def test_entities(
     assert entity_registry.async_get("sensor.roadrunner_climate_keeper").unique_id == (
         "teslamate/cars/1/climate_keeper_mode"
     )
+    assert entity_registry.async_get("sensor.roadrunner_display_name").unique_id == (
+        "teslamate/cars/1/display_name"
+    )
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"
     )
@@ -396,6 +476,7 @@ async def test_entities(
     await hass.async_block_till_done()
 
     assert hass.states.get("binary_sensor.roadrunner_doors").state == STATE_OFF
+    assert hass.states.get("sensor.roadrunner_display_name").state == "Bluebird"
     assert entry.title == "Bluebird"
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_energy_added", "1.1")

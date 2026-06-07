@@ -19,8 +19,8 @@
 | `climate_keeper_mode` | `Climate Keeper` |  |  | `mdi:air-conditioner` |  | Preserve the TeslaMate climate keeper mode as a human-readable string, but title case the value. | `Missing in publish_discovery.go` |
 | `display_name` | `Display Name` |  |  | `mdi:form-textbox` |  |  |  |
 | `doors_open` | `Doors` | `door` |  | `mdi:car-door` |  |  |  |
-| `driver_front_door_open` | `Door (Driver Front)` | `door` |  | `mdi:car` |  |  |  |
-| `driver_rear_door_open` | `Door (Driver Rear)` | `door` |  | `mdi:car` |  |  |  |
+| `driver_front_door_open` | `Door (Driver Front)` | `door` |  | `mdi:car-door` |  |  |  |
+| `driver_rear_door_open` | `Door (Driver Rear)` | `door` |  | `mdi:car-door` |  |  |  |
 | `elevation` | `Elevation` |  | `measurement` | `mdi:image-filter-hdr` | `unitsCfg.Distance.DistanceShortUnits()` | `unitsCfg.Distance.DistanceShortValueTemplate()` |  |
 | `est_battery_range_km` | `Range` |  | `measurement` | `mdi:map-marker-distance` | `unitsCfg.Distance.DistanceLongUnits()` | `unitsCfg.Distance.DistanceLongValueTemplate()` | `Conditional: Go uses fmt.Sprintf("%s_battery_range_km", unitsCfg.RangeType.Prefix()).` |
 | `exterior_color` | `Exterior Color` |  |  | `mdi:format-color-fill` |  |  |  |
@@ -40,8 +40,8 @@
 | `model` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
 | `odometer` | `Odometer` |  | `total_increasing` | `mdi:counter` | `unitsCfg.Distance.DistanceLongUnits()` | `unitsCfg.Distance.DistanceLongValueTemplate()` |  |
 | `outside_temp` | `Outside Temp` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
-| `passenger_front_door_open` | `Door (Passenger Front)` | `door` |  | `mdi:car` |  |  |  |
-| `passenger_rear_door_open` | `Door (Passenger Rear)` | `door` |  | `mdi:car` |  |  |  |
+| `passenger_front_door_open` | `Door (Passenger Front)` | `door` |  | `mdi:car-door` |  |  |  |
+| `passenger_rear_door_open` | `Door (Passenger Rear)` | `door` |  | `mdi:car-door` |  |  |  |
 | `plugged_in` | `Plug` | `plug` |  |  |  |  |  |
 | `power` | `Power` | `power` | `measurement` |  | `kW` |  |  |
 | `rated_battery_range_km` | `Range` |  | `measurement` | `mdi:map-marker-distance` | `unitsCfg.Distance.DistanceLongUnits()` | `unitsCfg.Distance.DistanceLongValueTemplate()` | `Conditional: Go uses fmt.Sprintf("%s_battery_range_km", unitsCfg.RangeType.Prefix()).` |
