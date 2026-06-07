@@ -133,6 +133,11 @@ async def test_entities(
     )
     assert hass.states.get("binary_sensor.roadrunner_frunk").state == STATE_UNKNOWN
     assert hass.states.get("binary_sensor.roadrunner_health").state == STATE_UNKNOWN
+    assert hass.states.get("binary_sensor.roadrunner_climate").state == STATE_UNKNOWN
+    assert hass.states.get("binary_sensor.roadrunner_preconditioning").state == (
+        STATE_UNKNOWN
+    )
+    assert hass.states.get("binary_sensor.roadrunner_occupied").state == STATE_UNKNOWN
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
@@ -178,6 +183,9 @@ async def test_entities(
     )
     async_fire_mqtt_message(hass, "teslamate/cars/1/frunk_open", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/healthy", "false")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/is_climate_on", "true")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/is_preconditioning", "false")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/is_user_present", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/latitude", "37.123")
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
     async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
@@ -266,6 +274,29 @@ async def test_entities(
     assert health_state.state == STATE_ON
     assert health_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.PROBLEM
     assert health_state.attributes[ATTR_ICON] == "mdi:heart-pulse"
+
+    climate_state = hass.states.get("binary_sensor.roadrunner_climate")
+    assert climate_state.state == STATE_ON
+    assert (
+        climate_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.RUNNING
+    )
+    assert climate_state.attributes[ATTR_ICON] == "mdi:air-conditioner"
+
+    preconditioning_state = hass.states.get("binary_sensor.roadrunner_preconditioning")
+    assert preconditioning_state.state == STATE_OFF
+    assert (
+        preconditioning_state.attributes[ATTR_DEVICE_CLASS]
+        == BinarySensorDeviceClass.RUNNING
+    )
+    assert preconditioning_state.attributes[ATTR_ICON] == "mdi:air-conditioner"
+
+    occupied_state = hass.states.get("binary_sensor.roadrunner_occupied")
+    assert occupied_state.state == STATE_ON
+    assert (
+        occupied_state.attributes[ATTR_DEVICE_CLASS]
+        == BinarySensorDeviceClass.OCCUPANCY
+    )
+    assert occupied_state.attributes[ATTR_ICON] == "mdi:account"
 
     tracker_state = hass.states.get("device_tracker.roadrunner")
     assert tracker_state.state == "not_home"
@@ -543,6 +574,15 @@ async def test_entities(
     )
     assert entity_registry.async_get("binary_sensor.roadrunner_health").unique_id == (
         "teslamate/cars/1/healthy"
+    )
+    assert entity_registry.async_get("binary_sensor.roadrunner_climate").unique_id == (
+        "teslamate/cars/1/is_climate_on"
+    )
+    assert entity_registry.async_get(
+        "binary_sensor.roadrunner_preconditioning"
+    ).unique_id == "teslamate/cars/1/is_preconditioning"
+    assert entity_registry.async_get("binary_sensor.roadrunner_occupied").unique_id == (
+        "teslamate/cars/1/is_user_present"
     )
     tracker_entry = entity_registry.async_get("device_tracker.roadrunner")
     assert tracker_entry.unique_id == "teslamate/cars/1/location"

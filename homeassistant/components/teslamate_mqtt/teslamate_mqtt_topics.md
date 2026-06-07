@@ -30,8 +30,8 @@
 | `healthy` | `Health` | `problem` |  | `mdi:heart-pulse` |  | Treat the TeslaMate healthy value as a Home Assistant problem binary sensor. Because TeslaMate publishes `true` when there are no problems and `false` when there are problems, invert the value so `true` reports off/no problem and `false` reports on/problem. |  |
 | `ideal_battery_range_km` | `Range (Ideal)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
 | `inside_temp` | `Temperature (Inside)` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
-| `is_climate_on` | `Climate` | `running` |  | `mdi:fan` |  |  |  |
-| `is_preconditioning` | `Preconditioning` | `running` |  | `mdi:fan` |  |  |  |
+| `is_climate_on` | `Climate` | `running` |  | `mdi:air-conditioner` |  |  |  |
+| `is_preconditioning` | `Preconditioning` | `running` |  | `mdi:air-conditioner` |  |  |  |
 | `is_user_present` | `Occupied` | `occupancy` |  | `mdi:account` |  |  |  |
 | `latitude` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
 | `location` |  |  |  | `mdi:car` |  | `home/not_home geofence template` | `Uses location as both state topic and JSON attributes topic.` |

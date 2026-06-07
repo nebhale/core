@@ -15,6 +15,9 @@ from .const import (
     TOPIC_DRIVER_REAR_DOOR_OPEN,
     TOPIC_FRUNK_OPEN,
     TOPIC_HEALTHY,
+    TOPIC_IS_CLIMATE_ON,
+    TOPIC_IS_PRECONDITIONING,
+    TOPIC_IS_USER_PRESENT,
     TOPIC_PASSENGER_FRONT_DOOR_OPEN,
     TOPIC_PASSENGER_REAR_DOOR_OPEN,
 )
@@ -37,8 +40,22 @@ async def async_setup_entry(
             TeslaMatePassengerRearDoorOpenBinarySensor(entry.runtime_data),
             TeslaMateFrunkOpenBinarySensor(entry.runtime_data),
             TeslaMateHealthyBinarySensor(entry.runtime_data),
+            TeslaMateClimateOnBinarySensor(entry.runtime_data),
+            TeslaMatePreconditioningBinarySensor(entry.runtime_data),
+            TeslaMateUserPresentBinarySensor(entry.runtime_data),
         ]
     )
+
+
+class TeslaMateBooleanBinarySensor(TeslaMateMqttEntity, BinarySensorEntity):
+    """Base class for TeslaMate boolean binary sensors."""
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if (value := self.data.value(self.key)) is None:
+            return None
+        return value.lower() == "true"
 
 
 class TeslaMateChargePortDoorOpenBinarySensor(
@@ -62,18 +79,11 @@ class TeslaMateChargePortDoorOpenBinarySensor(
         return value.lower() == "true"
 
 
-class TeslaMateDoorOpenBinarySensor(TeslaMateMqttEntity, BinarySensorEntity):
+class TeslaMateDoorOpenBinarySensor(TeslaMateBooleanBinarySensor):
     """Base class for TeslaMate door binary sensors."""
 
     _attr_device_class = BinarySensorDeviceClass.DOOR
     _attr_icon = "mdi:car-door"
-
-    @property
-    def is_on(self) -> bool | None:
-        """Return true if the door is open."""
-        if (value := self.data.value(self.key)) is None:
-            return None
-        return value.lower() == "true"
 
 
 class TeslaMateDoorsOpenBinarySensor(TeslaMateDoorOpenBinarySensor):
@@ -154,3 +164,39 @@ class TeslaMateHealthyBinarySensor(TeslaMateMqttEntity, BinarySensorEntity):
         if (value := self.data.value(TOPIC_HEALTHY)) is None:
             return None
         return value.lower() == "false"
+
+
+class TeslaMateClimateOnBinarySensor(TeslaMateBooleanBinarySensor):
+    """Representation of whether the Tesla climate is on."""
+
+    _attr_device_class = BinarySensorDeviceClass.RUNNING
+    _attr_icon = "mdi:air-conditioner"
+    _attr_name = "Climate"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_IS_CLIMATE_ON)
+
+
+class TeslaMatePreconditioningBinarySensor(TeslaMateBooleanBinarySensor):
+    """Representation of whether the Tesla is preconditioning."""
+
+    _attr_device_class = BinarySensorDeviceClass.RUNNING
+    _attr_icon = "mdi:air-conditioner"
+    _attr_name = "Preconditioning"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_IS_PRECONDITIONING)
+
+
+class TeslaMateUserPresentBinarySensor(TeslaMateBooleanBinarySensor):
+    """Representation of whether a user is present in the Tesla."""
+
+    _attr_device_class = BinarySensorDeviceClass.OCCUPANCY
+    _attr_icon = "mdi:account"
+    _attr_name = "Occupied"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_IS_USER_PRESENT)
