@@ -62,6 +62,7 @@ from .const import (
     TOPIC_TPMS_PRESSURE_FR,
     TOPIC_TPMS_PRESSURE_RL,
     TOPIC_TPMS_PRESSURE_RR,
+    TOPIC_USABLE_BATTERY_LEVEL,
 )
 from .entity import TeslaMateMqttEntity
 
@@ -129,6 +130,7 @@ async def async_setup_entry(
             TeslaMateTirePressureFrontRightSensor(entry.runtime_data),
             TeslaMateTirePressureRearLeftSensor(entry.runtime_data),
             TeslaMateTirePressureRearRightSensor(entry.runtime_data),
+            TeslaMateUsableBatteryLevelSensor(entry.runtime_data),
         ]
     )
 
@@ -149,6 +151,29 @@ class TeslaMateBatteryLevelSensor(TeslaMateMqttEntity, SensorEntity):
     def native_value(self) -> int | None:
         """Return the battery level."""
         if (value := self.data.value(TOPIC_BATTERY_LEVEL)) is None:
+            return None
+        try:
+            return int(value)
+        except ValueError:
+            return None
+
+
+class TeslaMateUsableBatteryLevelSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla usable battery level."""
+
+    _attr_device_class = SensorDeviceClass.BATTERY
+    _attr_name = "Usable Battery"
+    _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_USABLE_BATTERY_LEVEL)
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the usable battery level."""
+        if (value := self.data.value(TOPIC_USABLE_BATTERY_LEVEL)) is None:
             return None
         try:
             return int(value)

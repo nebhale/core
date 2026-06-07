@@ -29,6 +29,7 @@ from .const import (
     TOPIC_TPMS_SOFT_WARNING_RL,
     TOPIC_TPMS_SOFT_WARNING_RR,
     TOPIC_TRUNK_OPEN,
+    TOPIC_WINDOWS_OPEN,
 )
 from .entity import TeslaMateMqttEntity
 
@@ -60,6 +61,7 @@ async def async_setup_entry(
             TeslaMateTireSoftWarningRearLeftBinarySensor(entry.runtime_data),
             TeslaMateTireSoftWarningRearRightBinarySensor(entry.runtime_data),
             TeslaMateTrunkOpenBinarySensor(entry.runtime_data),
+            TeslaMateWindowsOpenBinarySensor(entry.runtime_data),
         ]
     )
 
@@ -171,6 +173,18 @@ class TeslaMateTrunkOpenBinarySensor(TeslaMateDoorOpenBinarySensor):
     def __init__(self, data) -> None:
         """Initialize the binary sensor."""
         super().__init__(data, TOPIC_TRUNK_OPEN)
+
+
+class TeslaMateWindowsOpenBinarySensor(TeslaMateBooleanBinarySensor):
+    """Representation of whether any Tesla window is open."""
+
+    _attr_device_class = BinarySensorDeviceClass.WINDOW
+    _attr_icon = "mdi:car-door"
+    _attr_name = "Windows"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_WINDOWS_OPEN)
 
 
 class TeslaMateHealthyBinarySensor(TeslaMateMqttEntity, BinarySensorEntity):

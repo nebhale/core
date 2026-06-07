@@ -153,6 +153,7 @@ async def test_entities(
         STATE_UNKNOWN
     )
     assert hass.states.get("binary_sensor.roadrunner_trunk").state == STATE_UNKNOWN
+    assert hass.states.get("binary_sensor.roadrunner_windows").state == STATE_UNKNOWN
     assert (
         hass.states.get("binary_sensor.roadrunner_tire_soft_front_left").state
         == STATE_UNKNOWN
@@ -228,6 +229,7 @@ async def test_entities(
         STATE_UNKNOWN
     )
     assert hass.states.get("sensor.roadrunner_update_version") is None
+    assert hass.states.get("sensor.roadrunner_usable_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version") is None
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -245,6 +247,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/plugged_in", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/sentry_mode", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trunk_open", "true")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/windows_open", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_soft_warning_fl", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_soft_warning_fr", "false")
     async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_soft_warning_rl", "false")
@@ -291,6 +294,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_pressure_rl", "2.7")
     async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_pressure_rr", "2.6")
     async_fire_mqtt_message(hass, "teslamate/cars/1/update_version", "2026.20.1")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/usable_battery_level", "71")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -358,6 +362,11 @@ async def test_entities(
     assert trunk_state.state == STATE_ON
     assert trunk_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.DOOR
     assert trunk_state.attributes[ATTR_ICON] == "mdi:car"
+
+    windows_state = hass.states.get("binary_sensor.roadrunner_windows")
+    assert windows_state.state == STATE_ON
+    assert windows_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.WINDOW
+    assert windows_state.attributes[ATTR_ICON] == "mdi:car-door"
 
     health_state = hass.states.get("binary_sensor.roadrunner_health")
     assert health_state.state == STATE_ON
@@ -458,6 +467,17 @@ async def test_entities(
     assert battery_state.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.BATTERY
     assert battery_state.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
     assert battery_state.attributes[ATTR_UNIT_OF_MEASUREMENT] == PERCENTAGE
+
+    usable_battery_state = hass.states.get("sensor.roadrunner_usable_battery")
+    assert usable_battery_state.state == "71"
+    assert (
+        usable_battery_state.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.BATTERY
+    )
+    assert (
+        usable_battery_state.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert usable_battery_state.attributes[ATTR_UNIT_OF_MEASUREMENT] == PERCENTAGE
 
     center_display_state = hass.states.get("sensor.roadrunner_center_display")
     assert center_display_state.state == "dog_mode"
@@ -944,6 +964,9 @@ async def test_entities(
     assert entity_registry.async_get("binary_sensor.roadrunner_trunk").unique_id == (
         "teslamate/cars/1/trunk_open"
     )
+    assert entity_registry.async_get("binary_sensor.roadrunner_windows").unique_id == (
+        "teslamate/cars/1/windows_open"
+    )
     assert entity_registry.async_get("binary_sensor.roadrunner_health").unique_id == (
         "teslamate/cars/1/healthy"
     )
@@ -1028,6 +1051,9 @@ async def test_entities(
     assert tracker_entry.entity_category is None
     assert entity_registry.async_get("sensor.roadrunner_battery").unique_id == (
         "teslamate/cars/1/battery_level"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_usable_battery").unique_id == (
+        "teslamate/cars/1/usable_battery_level"
     )
     assert entity_registry.async_get("sensor.roadrunner_center_display").unique_id == (
         "teslamate/cars/1/center_display_state"
