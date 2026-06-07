@@ -27,7 +27,7 @@
 | `frunk_open` | `Frunk` | `door` |  | `mdi:car` |  |  |  |
 | `geofence` | `Geofence` |  |  | `mdi:earth` |  |  |  |
 | `heading` | `Heading` |  | `measurement` | `mdi:compass` | `°` | Use zero digits of precision |  |
-| `healthy` | `Health` | `problem` |  | `mdi:heart-pulse` |  |  | `Payloads are inverted: healthy=false maps to ON/problem.` |
+| `healthy` | `Health` | `problem` |  | `mdi:heart-pulse` |  | Treat the TeslaMate healthy value as a Home Assistant problem binary sensor. Because TeslaMate publishes `true` when there are no problems and `false` when there are problems, invert the value so `true` reports off/no problem and `false` reports on/problem. |  |
 | `ideal_battery_range_km` | `Range (Ideal)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
 | `inside_temp` | `Inside Temp` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
 | `is_climate_on` | `Climate` | `running` |  | `mdi:fan` |  |  |  |

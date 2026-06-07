@@ -131,6 +131,7 @@ async def test_entities(
         STATE_UNKNOWN
     )
     assert hass.states.get("binary_sensor.roadrunner_frunk").state == STATE_UNKNOWN
+    assert hass.states.get("binary_sensor.roadrunner_health").state == STATE_UNKNOWN
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
@@ -169,6 +170,7 @@ async def test_entities(
         hass, "teslamate/cars/1/passenger_rear_door_open", "false"
     )
     async_fire_mqtt_message(hass, "teslamate/cars/1/frunk_open", "true")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/healthy", "false")
     async_fire_mqtt_message(hass, "teslamate/cars/1/latitude", "37.123")
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
     async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
@@ -250,6 +252,11 @@ async def test_entities(
     assert frunk_state.state == STATE_ON
     assert frunk_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.DOOR
     assert frunk_state.attributes[ATTR_ICON] == "mdi:car"
+
+    health_state = hass.states.get("binary_sensor.roadrunner_health")
+    assert health_state.state == STATE_ON
+    assert health_state.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.PROBLEM
+    assert health_state.attributes[ATTR_ICON] == "mdi:heart-pulse"
 
     tracker_state = hass.states.get("device_tracker.roadrunner")
     assert tracker_state.state == "not_home"
@@ -507,6 +514,9 @@ async def test_entities(
     assert entity_registry.async_get("binary_sensor.roadrunner_frunk").unique_id == (
         "teslamate/cars/1/frunk_open"
     )
+    assert entity_registry.async_get("binary_sensor.roadrunner_health").unique_id == (
+        "teslamate/cars/1/healthy"
+    )
     tracker_entry = entity_registry.async_get("device_tracker.roadrunner")
     assert tracker_entry.unique_id == "teslamate/cars/1/location"
     assert tracker_entry.entity_category is None
@@ -625,6 +635,25 @@ async def test_climate_keeper_mode_values(
     await hass.async_block_till_done()
 
     assert hass.states.get("sensor.roadrunner_climate_keeper").state == state
+
+
+@pytest.mark.parametrize(
+    ("payload", "state"),
+    [
+        pytest.param("true", STATE_OFF, id="healthy"),
+        pytest.param("false", STATE_ON, id="problem"),
+    ],
+)
+async def test_health_values(
+    hass: HomeAssistant, mqtt_mock: MqttMockHAClient, payload: str, state: str
+) -> None:
+    """Test health value mapping."""
+    await _async_setup_entry(hass)
+
+    async_fire_mqtt_message(hass, "teslamate/cars/1/healthy", payload)
+    await hass.async_block_till_done()
+
+    assert hass.states.get("binary_sensor.roadrunner_health").state == state
 
 
 @pytest.mark.parametrize(

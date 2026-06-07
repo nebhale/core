@@ -14,6 +14,7 @@ from .const import (
     TOPIC_DRIVER_FRONT_DOOR_OPEN,
     TOPIC_DRIVER_REAR_DOOR_OPEN,
     TOPIC_FRUNK_OPEN,
+    TOPIC_HEALTHY,
     TOPIC_PASSENGER_FRONT_DOOR_OPEN,
     TOPIC_PASSENGER_REAR_DOOR_OPEN,
 )
@@ -35,6 +36,7 @@ async def async_setup_entry(
             TeslaMatePassengerFrontDoorOpenBinarySensor(entry.runtime_data),
             TeslaMatePassengerRearDoorOpenBinarySensor(entry.runtime_data),
             TeslaMateFrunkOpenBinarySensor(entry.runtime_data),
+            TeslaMateHealthyBinarySensor(entry.runtime_data),
         ]
     )
 
@@ -133,3 +135,22 @@ class TeslaMateFrunkOpenBinarySensor(TeslaMateDoorOpenBinarySensor):
     def __init__(self, data) -> None:
         """Initialize the binary sensor."""
         super().__init__(data, TOPIC_FRUNK_OPEN)
+
+
+class TeslaMateHealthyBinarySensor(TeslaMateMqttEntity, BinarySensorEntity):
+    """Representation of whether the Tesla has problems."""
+
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
+    _attr_icon = "mdi:heart-pulse"
+    _attr_name = "Health"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_HEALTHY)
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the Tesla has problems."""
+        if (value := self.data.value(TOPIC_HEALTHY)) is None:
+            return None
+        return value.lower() == "false"
