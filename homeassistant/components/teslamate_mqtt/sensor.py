@@ -63,6 +63,7 @@ from .const import (
     TOPIC_TPMS_PRESSURE_RL,
     TOPIC_TPMS_PRESSURE_RR,
     TOPIC_USABLE_BATTERY_LEVEL,
+    TOPIC_WHEEL_TYPE,
 )
 from .entity import TeslaMateMqttEntity
 
@@ -86,6 +87,14 @@ ATTR_RAW_VALUE = "raw_value"
 def _split_camel_case(value: str) -> str:
     """Split camel-case words into space-separated words."""
     return re.sub(r"(?<=[a-z])(?=[A-Z])", " ", value)
+
+
+def _format_wheel_type(value: str) -> str:
+    """Format a compact TeslaMate wheel type."""
+    if (match := re.fullmatch(r"(?P<name>[A-Za-z]+)(?P<size>\d+)", value)) is None:
+        return _split_camel_case(value)
+
+    return f'{_split_camel_case(match["name"])} {match["size"]}"'
 
 
 async def async_setup_entry(
@@ -131,6 +140,7 @@ async def async_setup_entry(
             TeslaMateTirePressureRearLeftSensor(entry.runtime_data),
             TeslaMateTirePressureRearRightSensor(entry.runtime_data),
             TeslaMateUsableBatteryLevelSensor(entry.runtime_data),
+            TeslaMateWheelTypeSensor(entry.runtime_data),
         ]
     )
 
@@ -593,6 +603,24 @@ class TeslaMateStateSensor(TeslaMateMqttEntity, SensorEntity):
         if (value := self.data.value(TOPIC_STATE)) is None:
             return None
         return value.title()
+
+
+class TeslaMateWheelTypeSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla wheel type."""
+
+    _attr_icon = "mdi:tire"
+    _attr_name = "Wheel Type"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_WHEEL_TYPE)
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the wheel type."""
+        if (value := self.data.value(TOPIC_WHEEL_TYPE)) is None:
+            return None
+        return _format_wheel_type(value)
 
 
 class TeslaMateTimeToFullChargeSensor(TeslaMateFloatSensor):

@@ -67,5 +67,5 @@
 | `update_version` | `Update` | `firmware` |  |  |  |  | Used as the latest version on the update entity. |
 | `usable_battery_level` | `Usable Battery` | `battery` | `measurement` |  | `%` |  |  |
 | `version` | `Version` |  |  | `mdi:numeric` |  |  | Used as the Home Assistant device software version, so it is not exposed as a standalone sensor. |
-| `wheel_type` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
+| `wheel_type` | `Wheel Type` |  |  | `mdi:tire` |  | Treat the TeslaMate wheel type as a compact string made from a camel-case wheel name followed by trailing digits for the wheel size. Split the camel-case name into space-separated words, insert a space before the size, and append a double quote to the size. For example, `SonicCarbonTwinTurbine19` should display as `Sonic Carbon Twin Turbine 19"`. |  |
 | `windows_open` | `Windows` | `window` |  | `mdi:car-door` |  |  |  |
