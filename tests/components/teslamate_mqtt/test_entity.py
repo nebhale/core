@@ -30,6 +30,7 @@ from homeassistant.const import (
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
     UnitOfEnergy,
+    UnitOfLength,
     UnitOfPower,
 )
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
@@ -146,6 +147,10 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_charging_state").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_climate_keeper").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_display_name").state == "Roadrunner"
+    assert hass.states.get("sensor.roadrunner_elevation").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_range_estimated").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_range_ideal").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_range_rated").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -172,6 +177,10 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/charger_voltage", "240")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charging_state", "NoPower")
     async_fire_mqtt_message(hass, "teslamate/cars/1/climate_keeper_mode", "dog")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/elevation", "123")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/est_battery_range_km", "321.5")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/ideal_battery_range_km", "330.1")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/rated_battery_range_km", "325.7")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -391,6 +400,46 @@ async def test_entities(
     assert display_name.state == "Roadrunner"
     assert display_name.attributes[ATTR_ICON] == "mdi:form-textbox"
 
+    elevation = hass.states.get("sensor.roadrunner_elevation")
+    assert elevation.state == "123.0"
+    assert elevation.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.DISTANCE
+    assert elevation.attributes[ATTR_ICON] == "mdi:image-filter-hdr"
+    assert elevation.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
+    assert elevation.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfLength.METERS
+    assert entity_registry.async_get("sensor.roadrunner_elevation").options[
+        "sensor"
+    ]["suggested_display_precision"] == 0
+
+    estimated_range = hass.states.get("sensor.roadrunner_range_estimated")
+    assert estimated_range.state == "321.5"
+    assert estimated_range.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.DISTANCE
+    assert estimated_range.attributes[ATTR_ICON] == "mdi:map-marker-distance"
+    assert estimated_range.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
+    assert estimated_range.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfLength.KILOMETERS
+    assert entity_registry.async_get("sensor.roadrunner_range_estimated").options[
+        "sensor"
+    ]["suggested_display_precision"] == 1
+
+    ideal_range = hass.states.get("sensor.roadrunner_range_ideal")
+    assert ideal_range.state == "330.1"
+    assert ideal_range.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.DISTANCE
+    assert ideal_range.attributes[ATTR_ICON] == "mdi:map-marker-distance"
+    assert ideal_range.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
+    assert ideal_range.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfLength.KILOMETERS
+    assert entity_registry.async_get("sensor.roadrunner_range_ideal").options[
+        "sensor"
+    ]["suggested_display_precision"] == 1
+
+    rated_range = hass.states.get("sensor.roadrunner_range_rated")
+    assert rated_range.state == "325.7"
+    assert rated_range.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.DISTANCE
+    assert rated_range.attributes[ATTR_ICON] == "mdi:map-marker-distance"
+    assert rated_range.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
+    assert rated_range.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfLength.KILOMETERS
+    assert entity_registry.async_get("sensor.roadrunner_range_rated").options["sensor"][
+        "suggested_display_precision"
+    ] == 1
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -465,6 +514,18 @@ async def test_entities(
     )
     assert entity_registry.async_get("sensor.roadrunner_display_name").unique_id == (
         "teslamate/cars/1/display_name"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_elevation").unique_id == (
+        "teslamate/cars/1/elevation"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_range_estimated").unique_id == (
+        "teslamate/cars/1/est_battery_range_km"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_range_ideal").unique_id == (
+        "teslamate/cars/1/ideal_battery_range_km"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_range_rated").unique_id == (
+        "teslamate/cars/1/rated_battery_range_km"
     )
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"

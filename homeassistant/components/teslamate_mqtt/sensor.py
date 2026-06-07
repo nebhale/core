@@ -13,6 +13,7 @@ from homeassistant.const import (
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
     UnitOfEnergy,
+    UnitOfLength,
     UnitOfPower,
 )
 from homeassistant.core import HomeAssistant
@@ -33,6 +34,10 @@ from .const import (
     TOPIC_CHARGING_STATE,
     TOPIC_CLIMATE_KEEPER_MODE,
     TOPIC_DISPLAY_NAME,
+    TOPIC_ELEVATION,
+    TOPIC_EST_BATTERY_RANGE_KM,
+    TOPIC_IDEAL_BATTERY_RANGE_KM,
+    TOPIC_RATED_BATTERY_RANGE_KM,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -75,6 +80,10 @@ async def async_setup_entry(
             TeslaMateChargingStateSensor(entry.runtime_data),
             TeslaMateClimateKeeperModeSensor(entry.runtime_data),
             TeslaMateDisplayNameSensor(entry.runtime_data),
+            TeslaMateElevationSensor(entry.runtime_data),
+            TeslaMateEstimatedBatteryRangeSensor(entry.runtime_data),
+            TeslaMateIdealBatteryRangeSensor(entry.runtime_data),
+            TeslaMateRatedBatteryRangeSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -135,6 +144,23 @@ class TeslaMateIntegerMeasurementSensor(TeslaMateMqttEntity, SensorEntity):
             return None
         try:
             return int(value)
+        except ValueError:
+            return None
+
+
+class TeslaMateDistanceSensor(TeslaMateMqttEntity, SensorEntity):
+    """Base class for TeslaMate distance sensors."""
+
+    _attr_device_class = SensorDeviceClass.DISTANCE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the distance."""
+        if (value := self.data.value(self.key)) is None:
+            return None
+        try:
+            return float(value)
         except ValueError:
             return None
 
@@ -255,6 +281,57 @@ class TeslaMateDisplayNameSensor(TeslaMateMqttEntity, SensorEntity):
     def native_value(self) -> str | None:
         """Return the display name."""
         return self.data.value(TOPIC_DISPLAY_NAME)
+
+
+class TeslaMateElevationSensor(TeslaMateDistanceSensor):
+    """Representation of the Tesla elevation."""
+
+    _attr_icon = "mdi:image-filter-hdr"
+    _attr_name = "Elevation"
+    _attr_native_unit_of_measurement = UnitOfLength.METERS
+    _attr_suggested_display_precision = 0
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_ELEVATION)
+
+
+class TeslaMateBatteryRangeSensor(TeslaMateDistanceSensor):
+    """Base class for TeslaMate battery range sensors."""
+
+    _attr_icon = "mdi:map-marker-distance"
+    _attr_native_unit_of_measurement = UnitOfLength.KILOMETERS
+    _attr_suggested_display_precision = 1
+
+
+class TeslaMateEstimatedBatteryRangeSensor(TeslaMateBatteryRangeSensor):
+    """Representation of the Tesla estimated battery range."""
+
+    _attr_name = "Range (Estimated)"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_EST_BATTERY_RANGE_KM)
+
+
+class TeslaMateIdealBatteryRangeSensor(TeslaMateBatteryRangeSensor):
+    """Representation of the Tesla ideal battery range."""
+
+    _attr_name = "Range (Ideal)"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_IDEAL_BATTERY_RANGE_KM)
+
+
+class TeslaMateRatedBatteryRangeSensor(TeslaMateBatteryRangeSensor):
+    """Representation of the Tesla rated battery range."""
+
+    _attr_name = "Range (Rated)"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_RATED_BATTERY_RANGE_KM)
 
 
 class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):

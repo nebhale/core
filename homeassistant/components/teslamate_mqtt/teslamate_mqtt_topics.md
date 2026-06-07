@@ -21,14 +21,14 @@
 | `doors_open` | `Doors` | `door` |  | `mdi:car-door` |  |  |  |
 | `driver_front_door_open` | `Door (Driver Front)` | `door` |  | `mdi:car-door` |  |  |  |
 | `driver_rear_door_open` | `Door (Driver Rear)` | `door` |  | `mdi:car-door` |  |  |  |
-| `elevation` | `Elevation` |  | `measurement` | `mdi:image-filter-hdr` | `unitsCfg.Distance.DistanceShortUnits()` | `unitsCfg.Distance.DistanceShortValueTemplate()` |  |
-| `est_battery_range_km` | `Range` |  | `measurement` | `mdi:map-marker-distance` | `unitsCfg.Distance.DistanceLongUnits()` | `unitsCfg.Distance.DistanceLongValueTemplate()` | `Conditional: Go uses fmt.Sprintf("%s_battery_range_km", unitsCfg.RangeType.Prefix()).` |
+| `elevation` | `Elevation` | `distance` | `measurement` | `mdi:image-filter-hdr` | `m` | Use zero digits of precision |  |
+| `est_battery_range_km` | `Range (Estimated)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
 | `exterior_color` | `Exterior Color` |  |  | `mdi:format-color-fill` |  |  |  |
 | `frunk_open` | `Frunk` | `door` |  | `mdi:car` |  |  |  |
 | `geofence` | `Geofence` |  |  | `mdi:earth` |  |  |  |
 | `heading` | `Heading` |  |  | `mdi:compass` | `°` |  |  |
 | `healthy` | `Health` | `problem` |  | `mdi:heart-pulse` |  |  | `Payloads are inverted: healthy=false maps to ON/problem.` |
-| `ideal_battery_range_km` | `Range` |  | `measurement` | `mdi:map-marker-distance` | `unitsCfg.Distance.DistanceLongUnits()` | `unitsCfg.Distance.DistanceLongValueTemplate()` | `Conditional: Go uses fmt.Sprintf("%s_battery_range_km", unitsCfg.RangeType.Prefix()).` |
+| `ideal_battery_range_km` | `Range (Ideal)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
 | `inside_temp` | `Inside Temp` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
 | `is_climate_on` | `Climate` | `running` |  | `mdi:fan` |  |  |  |
 | `is_preconditioning` | `Preconditioning` | `running` |  | `mdi:fan` |  |  |  |
@@ -44,7 +44,7 @@
 | `passenger_rear_door_open` | `Door (Passenger Rear)` | `door` |  | `mdi:car-door` |  |  |  |
 | `plugged_in` | `Plug` | `plug` |  |  |  |  |  |
 | `power` | `Power` | `power` | `measurement` |  | `kW` |  |  |
-| `rated_battery_range_km` | `Range` |  | `measurement` | `mdi:map-marker-distance` | `unitsCfg.Distance.DistanceLongUnits()` | `unitsCfg.Distance.DistanceLongValueTemplate()` | `Conditional: Go uses fmt.Sprintf("%s_battery_range_km", unitsCfg.RangeType.Prefix()).` |
+| `rated_battery_range_km` | `Range (Rated)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
 | `scheduled_charging_start_time` | `Scheduled Start Time` | `timestamp` |  |  |  |  |  |
 | `sentry_mode` | `Sentry Mode` |  |  | `mdi:cctv` |  |  |  |
 | `shift_state` | `Shift State` |  |  | `mdi:car-shift-pattern` |  |  |  |
