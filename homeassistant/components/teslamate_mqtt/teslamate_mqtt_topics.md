@@ -1,9 +1,9 @@
 | Topic | Name | Device class | State class | Icon | Unit | Value template | Notes |
 |---|---|---|---|---|---|---|---|
-| `active_route_destination` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
-| `active_route_latitude` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
-| `active_route_longitude` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
-| `active_route` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
+| `active_route_destination` |  |  |  |  |  |  | Not currently implemented as it does not have an obvious sensor mapping. |
+| `active_route_latitude` |  |  |  |  |  |  | Not currently implemented as it does not have an obvious sensor mapping. |
+| `active_route_longitude` |  |  |  |  |  |  | Not currently implemented as it does not have an obvious sensor mapping. |
+| `active_route` |  |  |  |  |  |  | Not currently implemented as it does not have an obvious sensor mapping. |
 | `battery_level` | `Battery` | `battery` | `measurement` |  | `%` |  |  |
 | `center_display_state` | `Center Display` |  |  | `mdi:television` |  | For a Home Assistant Tesla `center_display_state` sensor, treat `vehicle_state.center_display_state` as an integer enum describing what the vehicle’s center display is currently showing or doing. Known values are: `0` means the center display is off. `2` means the display is on in standby, and may also represent Camp Mode. `3` means the display is on and showing the charging screen. `4` means the display is on in the general/default state. `5` means the display is on and showing the large charging screen. `6` means the display is on and ready to unlock. `7` means Sentry Mode. `8` means Dog Mode. `9` means Media. Value `1` is not documented in the sources I found, so preserve it as unknown rather than guessing. For future safety, any unrecognized integer should map to an unknown/unmapped state while retaining the raw value as an attribute. |  |
 | `charge_current_request_max` | `Charge Current Request (Max)` | `current` | `measurement` |  | `A` | Use zero digits of precision |  |
