@@ -1,6 +1,7 @@
 """Sensor platform for TeslaMate MQTT."""
 
 import logging
+import re
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -29,6 +30,7 @@ from .const import (
     TOPIC_CHARGER_PHASES,
     TOPIC_CHARGER_POWER,
     TOPIC_CHARGER_VOLTAGE,
+    TOPIC_CHARGING_STATE,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -68,6 +70,7 @@ async def async_setup_entry(
             TeslaMateChargerPhasesSensor(entry.runtime_data),
             TeslaMateChargerPowerSensor(entry.runtime_data),
             TeslaMateChargerVoltageSensor(entry.runtime_data),
+            TeslaMateChargingStateSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -196,6 +199,24 @@ class TeslaMateChargerVoltageSensor(TeslaMateIntegerMeasurementSensor):
     def __init__(self, data) -> None:
         """Initialize the sensor."""
         super().__init__(data, TOPIC_CHARGER_VOLTAGE)
+
+
+class TeslaMateChargingStateSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla charging state."""
+
+    _attr_icon = "mdi:ev-station"
+    _attr_name = "Charging State"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_CHARGING_STATE)
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the charging state."""
+        if (value := self.data.value(TOPIC_CHARGING_STATE)) is None:
+            return None
+        return re.sub(r"(?<=[a-z])(?=[A-Z])", " ", value)
 
 
 class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):

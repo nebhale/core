@@ -15,7 +15,7 @@
 | `charger_phases` | `Charger Phases` |  | `measurement` | `mdi:sine-wave` | `phases` | Use zero digits of precision |  |
 | `charger_power` | `Charger Power` | `power` | `measurement` |  | `kW` | Use zero digits of precision |  |
 | `charger_voltage` | `Charger Voltage` | `voltage` | `measurement` |  | `V` | Use zero digits of precision |  |
-| `charging_state` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
+| `charging_state` | `Charging State` |  |  | `mdi:ev-station` |  | Preserve the TeslaMate charging state as a human-readable string, but split camel-case words into space-separated words. For example, `NoPower` should display as `No Power`. | `Missing in publish_discovery.go` |
 | `climate_keeper_mode` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
 | `display_name` | `Display Name` |  |  | `mdi:form-textbox` |  |  |  |
 | `doors_open` | `Doors` | `door` |  | `mdi:car-door` |  |  |  |

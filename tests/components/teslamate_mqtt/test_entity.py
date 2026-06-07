@@ -131,6 +131,7 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_charger_phases").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_charger_power").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_charger_voltage").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_charging_state").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -147,6 +148,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/charger_phases", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charger_power", "11")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charger_voltage", "240")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charging_state", "NoPower")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -314,6 +316,10 @@ async def test_entities(
         "sensor"
     ]["suggested_display_precision"] == 0
 
+    charging_state = hass.states.get("sensor.roadrunner_charging_state")
+    assert charging_state.state == "No Power"
+    assert charging_state.attributes[ATTR_ICON] == "mdi:ev-station"
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -368,6 +374,9 @@ async def test_entities(
     assert entity_registry.async_get("sensor.roadrunner_charger_voltage").unique_id == (
         "teslamate/cars/1/charger_voltage"
     )
+    assert entity_registry.async_get("sensor.roadrunner_charging_state").unique_id == (
+        "teslamate/cars/1/charging_state"
+    )
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"
     )
@@ -384,6 +393,25 @@ async def test_entities(
     await hass.async_block_till_done()
 
     assert hass.states.get("sensor.roadrunner_energy_added").state == "1.1"
+
+
+@pytest.mark.parametrize(
+    ("payload", "state"),
+    [
+        pytest.param("Charging", "Charging", id="single_word"),
+        pytest.param("NoPower", "No Power", id="camel_case"),
+    ],
+)
+async def test_charging_state_values(
+    hass: HomeAssistant, mqtt_mock: MqttMockHAClient, payload: str, state: str
+) -> None:
+    """Test charging state value formatting."""
+    await _async_setup_entry(hass)
+
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charging_state", payload)
+    await hass.async_block_till_done()
+
+    assert hass.states.get("sensor.roadrunner_charging_state").state == state
 
 
 @pytest.mark.parametrize(
