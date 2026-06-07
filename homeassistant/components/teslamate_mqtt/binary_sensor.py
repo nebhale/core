@@ -4,6 +4,7 @@ from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
 )
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -23,6 +24,10 @@ from .const import (
     TOPIC_PASSENGER_REAR_DOOR_OPEN,
     TOPIC_PLUGGED_IN,
     TOPIC_SENTRY_MODE,
+    TOPIC_TPMS_SOFT_WARNING_FL,
+    TOPIC_TPMS_SOFT_WARNING_FR,
+    TOPIC_TPMS_SOFT_WARNING_RL,
+    TOPIC_TPMS_SOFT_WARNING_RR,
 )
 from .entity import TeslaMateMqttEntity
 
@@ -49,6 +54,10 @@ async def async_setup_entry(
             TeslaMateLockedBinarySensor(entry.runtime_data),
             TeslaMatePluggedInBinarySensor(entry.runtime_data),
             TeslaMateSentryModeBinarySensor(entry.runtime_data),
+            TeslaMateTireSoftWarningFrontLeftBinarySensor(entry.runtime_data),
+            TeslaMateTireSoftWarningFrontRightBinarySensor(entry.runtime_data),
+            TeslaMateTireSoftWarningRearLeftBinarySensor(entry.runtime_data),
+            TeslaMateTireSoftWarningRearRightBinarySensor(entry.runtime_data),
         ]
     )
 
@@ -157,6 +166,7 @@ class TeslaMateHealthyBinarySensor(TeslaMateMqttEntity, BinarySensorEntity):
     """Representation of whether the Tesla has problems."""
 
     _attr_device_class = BinarySensorDeviceClass.PROBLEM
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_icon = "mdi:heart-pulse"
     _attr_name = "Health"
 
@@ -247,3 +257,59 @@ class TeslaMateSentryModeBinarySensor(TeslaMateBooleanBinarySensor):
     def __init__(self, data) -> None:
         """Initialize the binary sensor."""
         super().__init__(data, TOPIC_SENTRY_MODE)
+
+
+class TeslaMateTireSoftWarningBinarySensor(TeslaMateBooleanBinarySensor):
+    """Base class for TeslaMate tire soft warning binary sensors."""
+
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:car-tire-alert"
+
+
+class TeslaMateTireSoftWarningFrontLeftBinarySensor(
+    TeslaMateTireSoftWarningBinarySensor
+):
+    """Representation of whether the Tesla front left tire is soft."""
+
+    _attr_name = "Tire Soft (Front Left)"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_TPMS_SOFT_WARNING_FL)
+
+
+class TeslaMateTireSoftWarningFrontRightBinarySensor(
+    TeslaMateTireSoftWarningBinarySensor
+):
+    """Representation of whether the Tesla front right tire is soft."""
+
+    _attr_name = "Tire Soft (Front Right)"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_TPMS_SOFT_WARNING_FR)
+
+
+class TeslaMateTireSoftWarningRearLeftBinarySensor(
+    TeslaMateTireSoftWarningBinarySensor
+):
+    """Representation of whether the Tesla rear left tire is soft."""
+
+    _attr_name = "Tire Soft (Rear Left)"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_TPMS_SOFT_WARNING_RL)
+
+
+class TeslaMateTireSoftWarningRearRightBinarySensor(
+    TeslaMateTireSoftWarningBinarySensor
+):
+    """Representation of whether the Tesla rear right tire is soft."""
+
+    _attr_name = "Tire Soft (Rear Right)"
+
+    def __init__(self, data) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(data, TOPIC_TPMS_SOFT_WARNING_RR)

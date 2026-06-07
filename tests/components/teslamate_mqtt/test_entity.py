@@ -24,6 +24,7 @@ from homeassistant.const import (
     ATTR_LONGITUDE,
     ATTR_UNIT_OF_MEASUREMENT,
     DEGREE,
+    EntityCategory,
     PERCENTAGE,
     STATE_OFF,
     STATE_ON,
@@ -33,6 +34,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfLength,
     UnitOfPower,
+    UnitOfPressure,
     UnitOfSpeed,
     UnitOfTemperature,
     UnitOfTime,
@@ -145,6 +147,18 @@ async def test_entities(
     assert hass.states.get("binary_sensor.roadrunner_sentry_mode").state == (
         STATE_UNKNOWN
     )
+    assert hass.states.get(
+        "binary_sensor.roadrunner_tire_soft_front_left"
+    ).state == STATE_UNKNOWN
+    assert hass.states.get(
+        "binary_sensor.roadrunner_tire_soft_front_right"
+    ).state == STATE_UNKNOWN
+    assert hass.states.get("binary_sensor.roadrunner_tire_soft_rear_left").state == (
+        STATE_UNKNOWN
+    )
+    assert hass.states.get("binary_sensor.roadrunner_tire_soft_rear_right").state == (
+        STATE_UNKNOWN
+    )
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
@@ -189,6 +203,18 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_charging_time_left").state == (
         STATE_UNKNOWN
     )
+    assert hass.states.get(
+        "sensor.roadrunner_tire_pressure_front_left"
+    ).state == STATE_UNKNOWN
+    assert hass.states.get(
+        "sensor.roadrunner_tire_pressure_front_right"
+    ).state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_tire_pressure_rear_left").state == (
+        STATE_UNKNOWN
+    )
+    assert hass.states.get("sensor.roadrunner_tire_pressure_rear_right").state == (
+        STATE_UNKNOWN
+    )
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -209,6 +235,10 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/locked", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/plugged_in", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/sentry_mode", "true")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_soft_warning_fl", "true")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_soft_warning_fr", "false")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_soft_warning_rl", "false")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_soft_warning_rr", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/latitude", "37.123")
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
     async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
@@ -245,6 +275,10 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/spoiler_type", "CarbonFiber")
     async_fire_mqtt_message(hass, "teslamate/cars/1/state", "suspended")
     async_fire_mqtt_message(hass, "teslamate/cars/1/time_to_full_charge", "1.75")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_pressure_fl", "2.9")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_pressure_fr", "2.8")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_pressure_rl", "2.7")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/tpms_pressure_rr", "2.6")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -346,6 +380,44 @@ async def test_entities(
     assert sentry_mode.state == STATE_ON
     assert sentry_mode.attributes[ATTR_DEVICE_CLASS] == BinarySensorDeviceClass.RUNNING
     assert sentry_mode.attributes[ATTR_ICON] == "mdi:cctv"
+
+    tire_soft_front_left = hass.states.get(
+        "binary_sensor.roadrunner_tire_soft_front_left"
+    )
+    assert tire_soft_front_left.state == STATE_ON
+    assert (
+        tire_soft_front_left.attributes[ATTR_DEVICE_CLASS]
+        == BinarySensorDeviceClass.PROBLEM
+    )
+    assert tire_soft_front_left.attributes[ATTR_ICON] == "mdi:car-tire-alert"
+
+    tire_soft_front_right = hass.states.get(
+        "binary_sensor.roadrunner_tire_soft_front_right"
+    )
+    assert tire_soft_front_right.state == STATE_OFF
+    assert (
+        tire_soft_front_right.attributes[ATTR_DEVICE_CLASS]
+        == BinarySensorDeviceClass.PROBLEM
+    )
+    assert tire_soft_front_right.attributes[ATTR_ICON] == "mdi:car-tire-alert"
+
+    tire_soft_rear_left = hass.states.get("binary_sensor.roadrunner_tire_soft_rear_left")
+    assert tire_soft_rear_left.state == STATE_OFF
+    assert (
+        tire_soft_rear_left.attributes[ATTR_DEVICE_CLASS]
+        == BinarySensorDeviceClass.PROBLEM
+    )
+    assert tire_soft_rear_left.attributes[ATTR_ICON] == "mdi:car-tire-alert"
+
+    tire_soft_rear_right = hass.states.get(
+        "binary_sensor.roadrunner_tire_soft_rear_right"
+    )
+    assert tire_soft_rear_right.state == STATE_ON
+    assert (
+        tire_soft_rear_right.attributes[ATTR_DEVICE_CLASS]
+        == BinarySensorDeviceClass.PROBLEM
+    )
+    assert tire_soft_rear_right.attributes[ATTR_ICON] == "mdi:car-tire-alert"
 
     tracker_state = hass.states.get("device_tracker.roadrunner")
     assert tracker_state.state == "not_home"
@@ -643,6 +715,90 @@ async def test_entities(
     assert charging_time_left.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
     assert charging_time_left.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfTime.HOURS
 
+    tire_pressure_front_left = hass.states.get(
+        "sensor.roadrunner_tire_pressure_front_left"
+    )
+    assert tire_pressure_front_left.state == "2.9"
+    assert (
+        tire_pressure_front_left.attributes[ATTR_DEVICE_CLASS]
+        == SensorDeviceClass.PRESSURE
+    )
+    assert tire_pressure_front_left.attributes[ATTR_ICON] == "mdi:gauge"
+    assert (
+        tire_pressure_front_left.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert (
+        tire_pressure_front_left.attributes[ATTR_UNIT_OF_MEASUREMENT]
+        == UnitOfPressure.BAR
+    )
+    assert entity_registry.async_get(
+        "sensor.roadrunner_tire_pressure_front_left"
+    ).options["sensor"]["suggested_display_precision"] == 1
+
+    tire_pressure_front_right = hass.states.get(
+        "sensor.roadrunner_tire_pressure_front_right"
+    )
+    assert tire_pressure_front_right.state == "2.8"
+    assert (
+        tire_pressure_front_right.attributes[ATTR_DEVICE_CLASS]
+        == SensorDeviceClass.PRESSURE
+    )
+    assert tire_pressure_front_right.attributes[ATTR_ICON] == "mdi:gauge"
+    assert (
+        tire_pressure_front_right.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert (
+        tire_pressure_front_right.attributes[ATTR_UNIT_OF_MEASUREMENT]
+        == UnitOfPressure.BAR
+    )
+    assert entity_registry.async_get(
+        "sensor.roadrunner_tire_pressure_front_right"
+    ).options["sensor"]["suggested_display_precision"] == 1
+
+    tire_pressure_rear_left = hass.states.get(
+        "sensor.roadrunner_tire_pressure_rear_left"
+    )
+    assert tire_pressure_rear_left.state == "2.7"
+    assert (
+        tire_pressure_rear_left.attributes[ATTR_DEVICE_CLASS]
+        == SensorDeviceClass.PRESSURE
+    )
+    assert tire_pressure_rear_left.attributes[ATTR_ICON] == "mdi:gauge"
+    assert (
+        tire_pressure_rear_left.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert (
+        tire_pressure_rear_left.attributes[ATTR_UNIT_OF_MEASUREMENT]
+        == UnitOfPressure.BAR
+    )
+    assert entity_registry.async_get(
+        "sensor.roadrunner_tire_pressure_rear_left"
+    ).options["sensor"]["suggested_display_precision"] == 1
+
+    tire_pressure_rear_right = hass.states.get(
+        "sensor.roadrunner_tire_pressure_rear_right"
+    )
+    assert tire_pressure_rear_right.state == "2.6"
+    assert (
+        tire_pressure_rear_right.attributes[ATTR_DEVICE_CLASS]
+        == SensorDeviceClass.PRESSURE
+    )
+    assert tire_pressure_rear_right.attributes[ATTR_ICON] == "mdi:gauge"
+    assert (
+        tire_pressure_rear_right.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert (
+        tire_pressure_rear_right.attributes[ATTR_UNIT_OF_MEASUREMENT]
+        == UnitOfPressure.BAR
+    )
+    assert entity_registry.async_get(
+        "sensor.roadrunner_tire_pressure_rear_right"
+    ).options["sensor"]["suggested_display_precision"] == 1
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -682,6 +838,12 @@ async def test_entities(
     assert entity_registry.async_get("binary_sensor.roadrunner_health").unique_id == (
         "teslamate/cars/1/healthy"
     )
+    assert (
+        entity_registry.async_get(
+            "binary_sensor.roadrunner_health"
+        ).entity_category
+        == EntityCategory.DIAGNOSTIC
+    )
     assert entity_registry.async_get("binary_sensor.roadrunner_climate").unique_id == (
         "teslamate/cars/1/is_climate_on"
     )
@@ -700,6 +862,42 @@ async def test_entities(
     assert entity_registry.async_get(
         "binary_sensor.roadrunner_sentry_mode"
     ).unique_id == "teslamate/cars/1/sentry_mode"
+    assert entity_registry.async_get(
+        "binary_sensor.roadrunner_tire_soft_front_left"
+    ).unique_id == "teslamate/cars/1/tpms_soft_warning_fl"
+    assert (
+        entity_registry.async_get(
+            "binary_sensor.roadrunner_tire_soft_front_left"
+        ).entity_category
+        == EntityCategory.DIAGNOSTIC
+    )
+    assert entity_registry.async_get(
+        "binary_sensor.roadrunner_tire_soft_front_right"
+    ).unique_id == "teslamate/cars/1/tpms_soft_warning_fr"
+    assert (
+        entity_registry.async_get(
+            "binary_sensor.roadrunner_tire_soft_front_right"
+        ).entity_category
+        == EntityCategory.DIAGNOSTIC
+    )
+    assert entity_registry.async_get(
+        "binary_sensor.roadrunner_tire_soft_rear_left"
+    ).unique_id == "teslamate/cars/1/tpms_soft_warning_rl"
+    assert (
+        entity_registry.async_get(
+            "binary_sensor.roadrunner_tire_soft_rear_left"
+        ).entity_category
+        == EntityCategory.DIAGNOSTIC
+    )
+    assert entity_registry.async_get(
+        "binary_sensor.roadrunner_tire_soft_rear_right"
+    ).unique_id == "teslamate/cars/1/tpms_soft_warning_rr"
+    assert (
+        entity_registry.async_get(
+            "binary_sensor.roadrunner_tire_soft_rear_right"
+        ).entity_category
+        == EntityCategory.DIAGNOSTIC
+    )
     tracker_entry = entity_registry.async_get("device_tracker.roadrunner")
     assert tracker_entry.unique_id == "teslamate/cars/1/location"
     assert tracker_entry.entity_category is None
@@ -794,6 +992,18 @@ async def test_entities(
     assert entity_registry.async_get(
         "sensor.roadrunner_charging_time_left"
     ).unique_id == "teslamate/cars/1/time_to_full_charge"
+    assert entity_registry.async_get(
+        "sensor.roadrunner_tire_pressure_front_left"
+    ).unique_id == "teslamate/cars/1/tpms_pressure_fl"
+    assert entity_registry.async_get(
+        "sensor.roadrunner_tire_pressure_front_right"
+    ).unique_id == "teslamate/cars/1/tpms_pressure_fr"
+    assert entity_registry.async_get(
+        "sensor.roadrunner_tire_pressure_rear_left"
+    ).unique_id == "teslamate/cars/1/tpms_pressure_rl"
+    assert entity_registry.async_get(
+        "sensor.roadrunner_tire_pressure_rear_right"
+    ).unique_id == "teslamate/cars/1/tpms_pressure_rr"
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"
     )

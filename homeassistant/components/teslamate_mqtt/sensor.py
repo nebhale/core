@@ -17,6 +17,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfLength,
     UnitOfPower,
+    UnitOfPressure,
     UnitOfSpeed,
     UnitOfTemperature,
     UnitOfTime,
@@ -57,6 +58,10 @@ from .const import (
     TOPIC_SPOILER_TYPE,
     TOPIC_STATE,
     TOPIC_TIME_TO_FULL_CHARGE,
+    TOPIC_TPMS_PRESSURE_FL,
+    TOPIC_TPMS_PRESSURE_FR,
+    TOPIC_TPMS_PRESSURE_RL,
+    TOPIC_TPMS_PRESSURE_RR,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -121,6 +126,10 @@ async def async_setup_entry(
             TeslaMateSpoilerTypeSensor(entry.runtime_data),
             TeslaMateStateSensor(entry.runtime_data),
             TeslaMateTimeToFullChargeSensor(entry.runtime_data),
+            TeslaMateTirePressureFrontLeftSensor(entry.runtime_data),
+            TeslaMateTirePressureFrontRightSensor(entry.runtime_data),
+            TeslaMateTirePressureRearLeftSensor(entry.runtime_data),
+            TeslaMateTirePressureRearRightSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -575,6 +584,56 @@ class TeslaMateTimeToFullChargeSensor(TeslaMateFloatSensor):
     def __init__(self, data) -> None:
         """Initialize the sensor."""
         super().__init__(data, TOPIC_TIME_TO_FULL_CHARGE)
+
+
+class TeslaMateTirePressureSensor(TeslaMateFloatSensor):
+    """Base class for TeslaMate tire pressure sensors."""
+
+    _attr_device_class = SensorDeviceClass.PRESSURE
+    _attr_icon = "mdi:gauge"
+    _attr_native_unit_of_measurement = UnitOfPressure.BAR
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
+
+
+class TeslaMateTirePressureFrontLeftSensor(TeslaMateTirePressureSensor):
+    """Representation of the Tesla front left tire pressure."""
+
+    _attr_name = "Tire Pressure (Front Left)"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_TPMS_PRESSURE_FL)
+
+
+class TeslaMateTirePressureFrontRightSensor(TeslaMateTirePressureSensor):
+    """Representation of the Tesla front right tire pressure."""
+
+    _attr_name = "Tire Pressure (Front Right)"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_TPMS_PRESSURE_FR)
+
+
+class TeslaMateTirePressureRearLeftSensor(TeslaMateTirePressureSensor):
+    """Representation of the Tesla rear left tire pressure."""
+
+    _attr_name = "Tire Pressure (Rear Left)"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_TPMS_PRESSURE_RL)
+
+
+class TeslaMateTirePressureRearRightSensor(TeslaMateTirePressureSensor):
+    """Representation of the Tesla rear right tire pressure."""
+
+    _attr_name = "Tire Pressure (Rear Right)"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_TPMS_PRESSURE_RR)
 
 
 class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):
