@@ -183,6 +183,7 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_shift_state").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_last_seen").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_speed").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_spoiler_type").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -236,6 +237,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/shift_state", "D")
     async_fire_mqtt_message(hass, "teslamate/cars/1/since", "2026-06-07T12:00:00+00:00")
     async_fire_mqtt_message(hass, "teslamate/cars/1/speed", "88")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/spoiler_type", "CarbonFiber")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -619,6 +621,10 @@ async def test_entities(
         "suggested_display_precision"
     ] == 0
 
+    spoiler_type = hass.states.get("sensor.roadrunner_spoiler_type")
+    assert spoiler_type.state == "CarbonFiber"
+    assert spoiler_type.attributes[ATTR_ICON] == "mdi:weather-windy"
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -760,6 +766,9 @@ async def test_entities(
     )
     assert entity_registry.async_get("sensor.roadrunner_speed").unique_id == (
         "teslamate/cars/1/speed"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_spoiler_type").unique_id == (
+        "teslamate/cars/1/spoiler_type"
     )
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"

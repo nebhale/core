@@ -53,6 +53,7 @@ from .const import (
     TOPIC_SHIFT_STATE,
     TOPIC_SINCE,
     TOPIC_SPEED,
+    TOPIC_SPOILER_TYPE,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -114,6 +115,7 @@ async def async_setup_entry(
             TeslaMateShiftStateSensor(entry.runtime_data),
             TeslaMateSinceSensor(entry.runtime_data),
             TeslaMateSpeedSensor(entry.runtime_data),
+            TeslaMateSpoilerTypeSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -520,6 +522,22 @@ class TeslaMateSpeedSensor(TeslaMateFloatSensor):
     def __init__(self, data) -> None:
         """Initialize the sensor."""
         super().__init__(data, TOPIC_SPEED)
+
+
+class TeslaMateSpoilerTypeSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla spoiler type."""
+
+    _attr_icon = "mdi:weather-windy"
+    _attr_name = "Spoiler Type"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_SPOILER_TYPE)
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the spoiler type."""
+        return self.data.value(TOPIC_SPOILER_TYPE)
 
 
 class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):
