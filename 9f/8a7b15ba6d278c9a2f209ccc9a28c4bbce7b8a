@@ -1,0 +1,19 @@
+homeassistant/components/teslamate_mqtt/teslamate_mqtt_topics.md
+  s_03e2d127cd5578::t_be1448fa9b079c 3-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9f8a7b15ba6d278c9a2f209ccc9a28c4bbce7b8a",
+  "prompts": {},
+  "sessions": {
+    "s_03e2d127cd5578": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea324-9889-7ea1-838f-7c39431ddbc8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Ben Hale <nebhale@nebhale.com>"
+    }
+  }
+}
