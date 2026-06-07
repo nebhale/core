@@ -20,6 +20,7 @@ from .const import (
     TOPIC_CHARGE_ENERGY_ADDED,
     TOPIC_CHARGE_LIMIT_SOC,
     TOPIC_CHARGER_ACTUAL_CURRENT,
+    TOPIC_CHARGER_PHASES,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -56,6 +57,7 @@ async def async_setup_entry(
             TeslaMateChargeCurrentRequestSensor(entry.runtime_data),
             TeslaMateChargeCurrentRequestMaxSensor(entry.runtime_data),
             TeslaMateChargerActualCurrentSensor(entry.runtime_data),
+            TeslaMateChargerPhasesSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -131,6 +133,30 @@ class TeslaMateChargerActualCurrentSensor(TeslaMateCurrentSensor):
     def __init__(self, data) -> None:
         """Initialize the sensor."""
         super().__init__(data, TOPIC_CHARGER_ACTUAL_CURRENT)
+
+
+class TeslaMateChargerPhasesSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla charger phases."""
+
+    _attr_icon = "mdi:sine-wave"
+    _attr_name = "Charger Phases"
+    _attr_native_unit_of_measurement = "phases"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 0
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_CHARGER_PHASES)
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the charger phases."""
+        if (value := self.data.value(TOPIC_CHARGER_PHASES)) is None:
+            return None
+        try:
+            return int(value)
+        except ValueError:
+            return None
 
 
 class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):

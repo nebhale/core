@@ -126,6 +126,7 @@ async def test_entities(
         STATE_UNKNOWN
     )
     assert hass.states.get("sensor.roadrunner_charger_current").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_charger_phases").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -139,6 +140,7 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_current_request", "24")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_current_request_max", "48")
     async_fire_mqtt_message(hass, "teslamate/cars/1/charger_actual_current", "40")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/charger_phases", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -261,6 +263,18 @@ async def test_entities(
         "sensor"
     ]["suggested_display_precision"] == 0
 
+    charger_phases_state = hass.states.get("sensor.roadrunner_charger_phases")
+    assert charger_phases_state.state == "3"
+    assert charger_phases_state.attributes[ATTR_ICON] == "mdi:sine-wave"
+    assert (
+        charger_phases_state.attributes[ATTR_STATE_CLASS]
+        == SensorStateClass.MEASUREMENT
+    )
+    assert charger_phases_state.attributes[ATTR_UNIT_OF_MEASUREMENT] == "phases"
+    assert entity_registry.async_get("sensor.roadrunner_charger_phases").options[
+        "sensor"
+    ]["suggested_display_precision"] == 0
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -305,6 +319,9 @@ async def test_entities(
     ).unique_id == "teslamate/cars/1/charge_current_request_max"
     assert entity_registry.async_get("sensor.roadrunner_charger_current").unique_id == (
         "teslamate/cars/1/charger_actual_current"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_charger_phases").unique_id == (
+        "teslamate/cars/1/charger_phases"
     )
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"

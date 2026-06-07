@@ -12,7 +12,7 @@
 | `charge_limit_soc` | `Charge Limit` |  | `measurement` | `mdi:battery-charging-90` | `%` |  |  |
 | `charge_port_door_open` | `Charge Port` | `door` |  | `mdi:ev-plug-tesla` |  |  |  |
 | `charger_actual_current` | `Charger Current` | `current` | `measurement` |  | `A` |  |  |
-| `charger_phases` | `Charger Phases` |  |  | `mdi:sine-wave` |  |  |  |
+| `charger_phases` | `Charger Phases` |  | `measurement` | `mdi:sine-wave` | `phases` | Use zero digits of precision |  |
 | `charger_power` | `Charger Power` | `power` | `measurement` |  | `kW` |  |  |
 | `charger_voltage` | `Charger Voltage` | `voltage` | `measurement` |  | `V` |  |  |
 | `charging_state` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
