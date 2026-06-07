@@ -45,7 +45,7 @@
 | `plugged_in` | `Plug` | `plug` |  |  |  |  |  |
 | `power` | `Power` | `power` | `measurement` |  | `kW` | Use zero digits of precision |  |
 | `rated_battery_range_km` | `Range (Rated)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
-| `scheduled_charging_start_time` | `Scheduled Start Time` | `timestamp` |  |  |  |  |  |
+| `scheduled_charging_start_time` | `Charging Start Time` | `timestamp` |  |  |  | Parse the value as a timestamp and use it as-is. |  |
 | `sentry_mode` | `Sentry Mode` |  |  | `mdi:cctv` |  |  |  |
 | `shift_state` | `Shift State` |  |  | `mdi:car-shift-pattern` |  |  |  |
 | `since` | `Last Seen` |  |  | `mdi:timer-sand` |  |  |  |

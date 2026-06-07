@@ -1,5 +1,6 @@
 """Sensor platform for TeslaMate MQTT."""
 
+from datetime import datetime
 import logging
 import re
 
@@ -20,6 +21,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.util import dt as dt_util
 
 from . import TeslaMateMqttConfigEntry
 from .const import (
@@ -46,6 +48,7 @@ from .const import (
     TOPIC_OUTSIDE_TEMP,
     TOPIC_POWER,
     TOPIC_RATED_BATTERY_RANGE_KM,
+    TOPIC_SCHEDULED_CHARGING_START_TIME,
     TOPIC_VERSION,
 )
 from .entity import TeslaMateMqttEntity
@@ -103,6 +106,7 @@ async def async_setup_entry(
             TeslaMateOutsideTemperatureSensor(entry.runtime_data),
             TeslaMatePowerSensor(entry.runtime_data),
             TeslaMateRatedBatteryRangeSensor(entry.runtime_data),
+            TeslaMateScheduledChargingStartTimeSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
     )
@@ -441,6 +445,24 @@ class TeslaMateRatedBatteryRangeSensor(TeslaMateBatteryRangeSensor):
     def __init__(self, data) -> None:
         """Initialize the sensor."""
         super().__init__(data, TOPIC_RATED_BATTERY_RANGE_KM)
+
+
+class TeslaMateScheduledChargingStartTimeSensor(TeslaMateMqttEntity, SensorEntity):
+    """Representation of the Tesla scheduled charging start time."""
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_name = "Charging Start Time"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_SCHEDULED_CHARGING_START_TIME)
+
+    @property
+    def native_value(self) -> datetime | None:
+        """Return the scheduled charging start time."""
+        if (value := self.data.value(TOPIC_SCHEDULED_CHARGING_START_TIME)) is None:
+            return None
+        return dt_util.parse_datetime(value)
 
 
 class TeslaMateChargeEnergyAddedSensor(TeslaMateMqttEntity, SensorEntity):

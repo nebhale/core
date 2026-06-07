@@ -173,6 +173,9 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_range_estimated").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_range_ideal").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_range_rated").state == STATE_UNKNOWN
+    assert hass.states.get(
+        "sensor.roadrunner_charging_start_time"
+    ).state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/charge_port_door_open", "true")
@@ -217,6 +220,11 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/est_battery_range_km", "321.5")
     async_fire_mqtt_message(hass, "teslamate/cars/1/ideal_battery_range_km", "330.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/rated_battery_range_km", "325.7")
+    async_fire_mqtt_message(
+        hass,
+        "teslamate/cars/1/scheduled_charging_start_time",
+        "2026-06-07T12:34:56+00:00",
+    )
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -567,6 +575,15 @@ async def test_entities(
         "suggested_display_precision"
     ] == 1
 
+    scheduled_start_time = hass.states.get(
+        "sensor.roadrunner_charging_start_time"
+    )
+    assert scheduled_start_time.state == "2026-06-07T12:34:56+00:00"
+    assert (
+        scheduled_start_time.attributes[ATTR_DEVICE_CLASS]
+        == SensorDeviceClass.TIMESTAMP
+    )
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
@@ -694,6 +711,9 @@ async def test_entities(
     assert entity_registry.async_get("sensor.roadrunner_range_rated").unique_id == (
         "teslamate/cars/1/rated_battery_range_km"
     )
+    assert entity_registry.async_get(
+        "sensor.roadrunner_charging_start_time"
+    ).unique_id == "teslamate/cars/1/scheduled_charging_start_time"
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"
     )
