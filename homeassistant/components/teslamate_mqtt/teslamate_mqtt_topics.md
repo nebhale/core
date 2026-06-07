@@ -29,7 +29,7 @@
 | `heading` | `Heading` |  | `measurement` | `mdi:compass` | `°` | Use zero digits of precision |  |
 | `healthy` | `Health` | `problem` |  | `mdi:heart-pulse` |  | Treat the TeslaMate healthy value as a Home Assistant problem binary sensor. Because TeslaMate publishes `true` when there are no problems and `false` when there are problems, invert the value so `true` reports off/no problem and `false` reports on/problem. |  |
 | `ideal_battery_range_km` | `Range (Ideal)` | `distance` | `measurement` | `mdi:map-marker-distance` | `km` | Use one digit of precision | |
-| `inside_temp` | `Inside Temp` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
+| `inside_temp` | `Temperature (Inside)` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
 | `is_climate_on` | `Climate` | `running` |  | `mdi:fan` |  |  |  |
 | `is_preconditioning` | `Preconditioning` | `running` |  | `mdi:fan` |  |  |  |
 | `is_user_present` | `Occupied` | `occupancy` |  | `mdi:account` |  |  |  |
@@ -39,7 +39,7 @@
 | `longitude` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
 | `model` |  |  |  |  |  |  | `Missing in publish_discovery.go` |
 | `odometer` | `Odometer` |  | `total_increasing` | `mdi:counter` | `unitsCfg.Distance.DistanceLongUnits()` | `unitsCfg.Distance.DistanceLongValueTemplate()` |  |
-| `outside_temp` | `Outside Temp` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
+| `outside_temp` | `Temperature (Outside)` | `temperature` | `measurement` |  | `°C` | Use one digit of precision |  |
 | `passenger_front_door_open` | `Door (Passenger Front)` | `door` |  | `mdi:car-door` |  |  |  |
 | `passenger_rear_door_open` | `Door (Passenger Rear)` | `door` |  | `mdi:car-door` |  |  |  |
 | `plugged_in` | `Plug` | `plug` |  |  |  |  |  |

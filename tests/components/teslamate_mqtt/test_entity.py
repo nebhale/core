@@ -33,6 +33,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfLength,
     UnitOfPower,
+    UnitOfTemperature,
 )
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr, entity_registry as er
@@ -154,6 +155,12 @@ async def test_entities(
     assert hass.states.get("sensor.roadrunner_exterior_color").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_geofence").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_heading").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_temperature_inside").state == (
+        STATE_UNKNOWN
+    )
+    assert hass.states.get("sensor.roadrunner_temperature_outside").state == (
+        STATE_UNKNOWN
+    )
     assert hass.states.get("sensor.roadrunner_range_estimated").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_range_ideal").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_range_rated").state == STATE_UNKNOWN
@@ -189,6 +196,8 @@ async def test_entities(
     async_fire_mqtt_message(hass, "teslamate/cars/1/exterior_color", "DeepBlue")
     async_fire_mqtt_message(hass, "teslamate/cars/1/geofence", "Home")
     async_fire_mqtt_message(hass, "teslamate/cars/1/heading", "270")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/inside_temp", "22.4")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/outside_temp", "18.7")
     async_fire_mqtt_message(hass, "teslamate/cars/1/est_battery_range_km", "321.5")
     async_fire_mqtt_message(hass, "teslamate/cars/1/ideal_battery_range_km", "330.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/rated_battery_range_km", "325.7")
@@ -448,6 +457,24 @@ async def test_entities(
         "suggested_display_precision"
     ] == 0
 
+    inside_temp = hass.states.get("sensor.roadrunner_temperature_inside")
+    assert inside_temp.state == "22.4"
+    assert inside_temp.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.TEMPERATURE
+    assert inside_temp.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
+    assert inside_temp.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfTemperature.CELSIUS
+    assert entity_registry.async_get("sensor.roadrunner_temperature_inside").options[
+        "sensor"
+    ]["suggested_display_precision"] == 1
+
+    outside_temp = hass.states.get("sensor.roadrunner_temperature_outside")
+    assert outside_temp.state == "18.7"
+    assert outside_temp.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.TEMPERATURE
+    assert outside_temp.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
+    assert outside_temp.attributes[ATTR_UNIT_OF_MEASUREMENT] == UnitOfTemperature.CELSIUS
+    assert entity_registry.async_get("sensor.roadrunner_temperature_outside").options[
+        "sensor"
+    ]["suggested_display_precision"] == 1
+
     estimated_range = hass.states.get("sensor.roadrunner_range_estimated")
     assert estimated_range.state == "321.5"
     assert estimated_range.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.DISTANCE
@@ -571,6 +598,12 @@ async def test_entities(
     assert entity_registry.async_get("sensor.roadrunner_heading").unique_id == (
         "teslamate/cars/1/heading"
     )
+    assert entity_registry.async_get(
+        "sensor.roadrunner_temperature_inside"
+    ).unique_id == "teslamate/cars/1/inside_temp"
+    assert entity_registry.async_get(
+        "sensor.roadrunner_temperature_outside"
+    ).unique_id == "teslamate/cars/1/outside_temp"
     assert entity_registry.async_get("sensor.roadrunner_range_estimated").unique_id == (
         "teslamate/cars/1/est_battery_range_km"
     )

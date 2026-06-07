@@ -16,6 +16,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfLength,
     UnitOfPower,
+    UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -41,6 +42,8 @@ from .const import (
     TOPIC_GEOFENCE,
     TOPIC_HEADING,
     TOPIC_IDEAL_BATTERY_RANGE_KM,
+    TOPIC_INSIDE_TEMP,
+    TOPIC_OUTSIDE_TEMP,
     TOPIC_RATED_BATTERY_RANGE_KM,
     TOPIC_VERSION,
 )
@@ -95,6 +98,8 @@ async def async_setup_entry(
             TeslaMateGeofenceSensor(entry.runtime_data),
             TeslaMateHeadingSensor(entry.runtime_data),
             TeslaMateIdealBatteryRangeSensor(entry.runtime_data),
+            TeslaMateInsideTemperatureSensor(entry.runtime_data),
+            TeslaMateOutsideTemperatureSensor(entry.runtime_data),
             TeslaMateRatedBatteryRangeSensor(entry.runtime_data),
             TeslaMateVersionSensor(entry.runtime_data),
         ]
@@ -179,6 +184,15 @@ class TeslaMateDistanceSensor(TeslaMateFloatSensor):
 
     _attr_device_class = SensorDeviceClass.DISTANCE
     _attr_state_class = SensorStateClass.MEASUREMENT
+
+
+class TeslaMateTemperatureSensor(TeslaMateFloatSensor):
+    """Base class for TeslaMate temperature sensors."""
+
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
 
 
 class TeslaMateChargeCurrentRequestSensor(TeslaMateCurrentSensor):
@@ -385,6 +399,26 @@ class TeslaMateIdealBatteryRangeSensor(TeslaMateBatteryRangeSensor):
     def __init__(self, data) -> None:
         """Initialize the sensor."""
         super().__init__(data, TOPIC_IDEAL_BATTERY_RANGE_KM)
+
+
+class TeslaMateInsideTemperatureSensor(TeslaMateTemperatureSensor):
+    """Representation of the Tesla inside temperature."""
+
+    _attr_name = "Temperature (Inside)"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_INSIDE_TEMP)
+
+
+class TeslaMateOutsideTemperatureSensor(TeslaMateTemperatureSensor):
+    """Representation of the Tesla outside temperature."""
+
+    _attr_name = "Temperature (Outside)"
+
+    def __init__(self, data) -> None:
+        """Initialize the sensor."""
+        super().__init__(data, TOPIC_OUTSIDE_TEMP)
 
 
 class TeslaMateRatedBatteryRangeSensor(TeslaMateBatteryRangeSensor):
