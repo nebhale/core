@@ -2,16 +2,27 @@
 
 import asyncio
 from collections.abc import Callable, Coroutine
+import logging
 from typing import Any
 from unittest.mock import patch
 
+import pytest
+
 from homeassistant.components import mqtt
+from homeassistant.components.sensor import (
+    ATTR_STATE_CLASS,
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from homeassistant.components.teslamate_mqtt.const import CONF_TOPIC_ROOT, DOMAIN
 from homeassistant.const import (
+    ATTR_DEVICE_CLASS,
     ATTR_GPS_ACCURACY,
     ATTR_ICON,
     ATTR_LATITUDE,
     ATTR_LONGITUDE,
+    ATTR_UNIT_OF_MEASUREMENT,
+    PERCENTAGE,
     STATE_OFF,
     STATE_ON,
     STATE_UNKNOWN,
@@ -55,9 +66,7 @@ async def _async_setup_entry(
     async def async_subscribe(
         hass: HomeAssistant,
         topic: str,
-        msg_callback: Callable[
-            [mqtt.ReceiveMessage], Coroutine[Any, Any, None] | None
-        ],
+        msg_callback: Callable[[mqtt.ReceiveMessage], Coroutine[Any, Any, None] | None],
         qos: int = 0,
         encoding: str | None = "utf-8",
     ) -> CALLBACK_TYPE:
@@ -66,12 +75,15 @@ async def _async_setup_entry(
         subscribe_started.set()
         return unsub
 
-    with patch(
-        "homeassistant.components.teslamate_mqtt.mqtt.async_on_subscribe_done",
-        side_effect=_async_on_subscribe_done,
-    ), patch(
-        "homeassistant.components.teslamate_mqtt.mqtt.async_subscribe",
-        side_effect=async_subscribe,
+    with (
+        patch(
+            "homeassistant.components.teslamate_mqtt.mqtt.async_on_subscribe_done",
+            side_effect=_async_on_subscribe_done,
+        ),
+        patch(
+            "homeassistant.components.teslamate_mqtt.mqtt.async_subscribe",
+            side_effect=async_subscribe,
+        ),
     ):
         setup_task = hass.async_create_task(
             hass.config_entries.async_setup(entry.entry_id)
@@ -97,11 +109,15 @@ async def test_entities(
 
     assert hass.states.get("binary_sensor.roadrunner_doors").state == STATE_UNKNOWN
     assert hass.states.get("device_tracker.roadrunner").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_battery").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.roadrunner_center_display").state == STATE_UNKNOWN
     assert hass.states.get("sensor.roadrunner_version").state == STATE_UNKNOWN
 
     async_fire_mqtt_message(hass, "teslamate/cars/1/doors_open", "true")
     async_fire_mqtt_message(hass, "teslamate/cars/1/latitude", "37.123")
     async_fire_mqtt_message(hass, "teslamate/cars/1/longitude", "-122.456")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/battery_level", "74")
+    async_fire_mqtt_message(hass, "teslamate/cars/1/center_display_state", "8")
     async_fire_mqtt_message(hass, "teslamate/cars/1/version", "2026.14.1")
     async_fire_mqtt_message(hass, "teslamate/cars/1/model", "3")
     async_fire_mqtt_message(hass, "teslamate/cars/1/trim_badging", "Performance")
@@ -120,13 +136,26 @@ async def test_entities(
     assert tracker_state.attributes[ATTR_GPS_ACCURACY] == 0
     assert tracker_state.attributes[ATTR_ICON] == "mdi:crosshairs-gps"
 
+    battery_state = hass.states.get("sensor.roadrunner_battery")
+    assert battery_state.state == "74"
+    assert battery_state.attributes[ATTR_DEVICE_CLASS] == SensorDeviceClass.BATTERY
+    assert battery_state.attributes[ATTR_STATE_CLASS] == SensorStateClass.MEASUREMENT
+    assert battery_state.attributes[ATTR_UNIT_OF_MEASUREMENT] == PERCENTAGE
+
+    center_display_state = hass.states.get("sensor.roadrunner_center_display")
+    assert center_display_state.state == "dog_mode"
+    assert center_display_state.attributes[ATTR_ICON] == "mdi:television"
+    assert center_display_state.attributes["raw_value"] == "8"
+
     assert hass.states.get("sensor.roadrunner_version").state == "2026.14.1"
     assert (
         hass.states.get("sensor.roadrunner_version").attributes[ATTR_ICON]
         == "mdi:numeric"
     )
 
-    device = device_registry.async_get_device(identifiers={(DOMAIN, "teslamate/cars/1")})
+    device = device_registry.async_get_device(
+        identifiers={(DOMAIN, "teslamate/cars/1")}
+    )
     assert device is not None
     assert device.manufacturer == "Tesla"
     assert device.name == "Roadrunner"
@@ -139,6 +168,12 @@ async def test_entities(
     tracker_entry = entity_registry.async_get("device_tracker.roadrunner")
     assert tracker_entry.unique_id == "teslamate/cars/1/location"
     assert tracker_entry.entity_category is None
+    assert entity_registry.async_get("sensor.roadrunner_battery").unique_id == (
+        "teslamate/cars/1/battery_level"
+    )
+    assert entity_registry.async_get("sensor.roadrunner_center_display").unique_id == (
+        "teslamate/cars/1/center_display_state"
+    )
     assert entity_registry.async_get("sensor.roadrunner_version").unique_id == (
         "teslamate/cars/1/version"
     )
@@ -150,6 +185,76 @@ async def test_entities(
 
     assert hass.states.get("binary_sensor.roadrunner_doors").state == STATE_OFF
     assert entry.title == "Bluebird"
+
+
+@pytest.mark.parametrize(
+    ("payload", "state"),
+    [
+        pytest.param("0", "off", id="off"),
+        pytest.param("2", "standby", id="standby"),
+        pytest.param("3", "charging", id="charging"),
+        pytest.param("4", "on", id="on"),
+        pytest.param("5", "large_charging", id="large_charging"),
+        pytest.param("6", "ready_to_unlock", id="ready_to_unlock"),
+        pytest.param("7", "sentry_mode", id="sentry_mode"),
+        pytest.param("8", "dog_mode", id="dog_mode"),
+        pytest.param("9", "media", id="media"),
+    ],
+)
+async def test_center_display_state_values(
+    hass: HomeAssistant, mqtt_mock: MqttMockHAClient, payload: str, state: str
+) -> None:
+    """Test center display state value mapping."""
+    await _async_setup_entry(hass)
+
+    async_fire_mqtt_message(hass, "teslamate/cars/1/center_display_state", payload)
+    await hass.async_block_till_done()
+
+    center_display_state = hass.states.get("sensor.roadrunner_center_display")
+    assert center_display_state.state == state
+    assert center_display_state.attributes["raw_value"] == payload
+
+
+async def test_center_display_state_undocumented_value(
+    hass: HomeAssistant, mqtt_mock: MqttMockHAClient, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Test undocumented center display state value."""
+    await _async_setup_entry(hass)
+    caplog.set_level(logging.WARNING)
+
+    async_fire_mqtt_message(hass, "teslamate/cars/1/center_display_state", "1")
+    await hass.async_block_till_done()
+
+    center_display_state = hass.states.get("sensor.roadrunner_center_display")
+    assert center_display_state.state == STATE_UNKNOWN
+    assert center_display_state.attributes["raw_value"] == "1"
+    assert "Unexpected center display state value" not in caplog.text
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        pytest.param("10", id="unmapped_integer"),
+        pytest.param("bogus", id="non_integer"),
+    ],
+)
+async def test_center_display_state_unexpected_value(
+    hass: HomeAssistant,
+    mqtt_mock: MqttMockHAClient,
+    caplog: pytest.LogCaptureFixture,
+    payload: str,
+) -> None:
+    """Test unexpected center display state values."""
+    await _async_setup_entry(hass)
+    caplog.set_level(logging.WARNING)
+
+    async_fire_mqtt_message(hass, "teslamate/cars/1/center_display_state", payload)
+    await hass.async_block_till_done()
+
+    center_display_state = hass.states.get("sensor.roadrunner_center_display")
+    assert center_display_state.state == STATE_UNKNOWN
+    assert center_display_state.attributes["raw_value"] == payload
+    assert f"Unexpected center display state value: {payload}" in caplog.text
 
 
 async def test_setup_fails_without_display_name(
